@@ -58,12 +58,14 @@ jobs:
           test -f docs/IMPLEMENTATION_EVIDENCE.md
           test -f docs/SYSTEM_VALIDATION_WALKTHROUGH.md
           test -f docs/CAPABILITY_MATRIX.md
+          test -f docs/SERVING_VALIDATION.md
           test -f databricks/databricks.yml
           test -f databricks/resources/jobs.yml
           test -f databricks/resources/rollback.yml
           test -f databricks/src_databricks/promote_waterfall.py
           test -f databricks/src_databricks/rollback_waterfall.py
           test -f k8s/deployment.yaml
+          test -f k8s/kustomization.yaml
           test -f docs/OPERATIONS_RUNBOOK.md
           test -f docs/PRODUCTION_READINESS.md
           test -f examples/README.md
@@ -134,12 +136,36 @@ jobs:
             --env SERVICE_VERSION=1.1.0 \
             --env BUILD_SHA="${GITHUB_SHA}" \
             hospitality-data-platform-api:ci
+      - name: Wait for container health
+        run: |
+          for attempt in $(seq 1 60); do
+            running="$(docker inspect --format '{{.State.Running}}' member-risk-api-ci)"
+            health="$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' member-risk-api-ci)"
+            echo "health attempt ${attempt}: running=${running}, health=${health}"
+            if [ "${running}" != "true" ]; then
+              docker inspect member-risk-api-ci
+              docker logs member-risk-api-ci
+              exit 1
+            fi
+            if [ "${health}" = "healthy" ]; then
+              exit 0
+            fi
+            if [ "${health}" = "unhealthy" ]; then
+              docker inspect member-risk-api-ci
+              docker logs member-risk-api-ci
+              exit 1
+            fi
+            sleep 2
+          done
+          docker inspect member-risk-api-ci
+          docker logs member-risk-api-ci
+          exit 1
       - name: Execute serving contract smoke test
         run: >-
           python scripts/smoke_test_serving.py
           --base-url http://localhost:8080
-          --attempts 45
-          --delay-seconds 2
+          --attempts 15
+          --delay-seconds 1
           --evidence artifacts/serving/ci-smoke.json
       - name: Capture container evidence
         if: always()
