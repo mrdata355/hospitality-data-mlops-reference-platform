@@ -29,6 +29,7 @@ jobs:
         run: >-
           python -m compileall -q
           src
+          benchmarks
           databricks/src_databricks
           sql/databricks/01_bronze_autoloader.py
           scripts/export_examples.py
@@ -40,7 +41,17 @@ jobs:
           python scripts/export_examples.py
           git diff --exit-code -- examples
       - name: Run automated tests
-        run: pytest -q
+        run: |
+          mkdir -p artifacts/test-results
+          pytest -q --junitxml=artifacts/test-results/pytest.xml
+      - name: Upload test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-evidence
+          path: artifacts/test-results
+          if-no-files-found: warn
+          retention-days: 14
       - name: Enforce model acceptance gates
         run: |
           python - <<'PY'
@@ -71,6 +82,9 @@ jobs:
           test -f docs/PRODUCTION_READINESS.md
           test -f examples/README.md
           test -f examples/sample_outputs/validation_summary.json
+          test -f benchmarks/lakehouse_scale/benchmark.py
+          test -f benchmarks/lakehouse_scale/configs/profiles.yml
+          test -f benchmarks/lakehouse_scale/evidence/run_manifest.template.json
       - name: Upload validated model artifact
         uses: actions/upload-artifact@v4
         with:
@@ -102,7 +116,7 @@ jobs:
       - name: Install engineering validation tools
         run: pip install -r requirements-dev.txt
       - name: Detect Python correctness defects
-        run: ruff check src tests scripts --select E9,F63,F7,F82 --output-format=github
+        run: ruff check src benchmarks tests scripts --select E9,F63,F7,F82 --output-format=github
       - name: Audit Python dependencies
         run: |
           mkdir -p artifacts/security
