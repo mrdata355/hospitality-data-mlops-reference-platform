@@ -1,22 +1,24 @@
-# Start Here: Kellon Lewis Portfolio Runbook
+# Local Validation and Deployment Guide
 
-This guide walks through the repository in the same order used to validate it.
+This guide describes how to run, verify, and inspect the platform without cloud credentials.
 
-## 1. What this repository proves
+## System scope
 
-The project is an independent, production-style hospitality data and MLOps reference implementation. It demonstrates:
+The repository implements a hospitality data and MLOps reference platform with:
 
 - deterministic synthetic source generation
 - Bronze, Silver, conformed dimensional, and Gold processing
-- point-in-time feature engineering
+- point-in-time member and resort-week feature products
 - member-risk classification and resort-week forecasting
 - model acceptance gates and seasonal-baseline comparison
 - FastAPI scoring, Docker, Kubernetes, and health/readiness probes
 - Databricks Asset Bundles, MLflow promotion, rollback, monitoring, SLOs, and runbooks
 
-It contains no real customer records, credentials, proprietary source-system details, or deployed company infrastructure.
+The repository contains no real customer records, production credentials, proprietary source-system details, or deployed company infrastructure.
 
-## 2. First local run
+## Local environment
+
+Create a virtual environment:
 
 ```bash
 python -m venv .venv
@@ -32,28 +34,30 @@ source .venv/bin/activate
 .venv\Scripts\Activate.ps1
 ```
 
-Install and verify:
+Install dependencies and run the complete validation path:
 
 ```bash
 pip install -r requirements.txt
 make validate
 ```
 
-Expected verification evidence:
+Expected validation outcomes:
 
-- the complete automated test suite passes
-- member-risk ROC AUC remains at or above 0.75
-- forecast WAPE remains at or below 0.30
+- the automated test suite passes
+- member-risk ROC AUC remains at or above `0.75`
+- forecast WAPE remains at or below `0.30`
 - forecast WAPE remains no worse than the 52-week seasonal baseline
-- generated datasets, models, metrics, predictions, and monitoring outputs are recreated from source
+- generated datasets, features, models, metrics, predictions, examples, and monitoring outputs are recreated from source
 
-## 3. Run the API
+## API execution
+
+Start the scoring API:
 
 ```bash
 make api
 ```
 
-Open:
+Available endpoints:
 
 - `http://localhost:8080/docs`
 - `http://localhost:8080/health`
@@ -61,18 +65,20 @@ Open:
 - `http://localhost:8080/model-info`
 - `http://localhost:8080/metrics`
 
-## 4. Run with Docker
+## Container execution
 
-The model must be generated once before building the local image:
+Generate the local model artifact before building the image:
 
 ```bash
 python scripts/run_all.py
 docker compose up --build
 ```
 
-## 5. Exercise the scoring service
+The container runs as a non-root user and uses the readiness endpoint for its health check.
 
-Install development dependencies, start the API, and launch the load test:
+## Load validation
+
+Install development dependencies, start the API, and launch Locust:
 
 ```bash
 pip install -r requirements-dev.txt
@@ -80,21 +86,21 @@ make api
 make loadtest
 ```
 
-The load test exercises scoring, readiness, and liveness endpoints with representative generated feature payloads.
+The load profile exercises scoring, readiness, and liveness endpoints with generated feature payloads. Retain controlled test results before making capacity or latency claims.
 
-## 6. Add credentials later
+## Credential management
 
-Never commit passwords, access tokens, client secrets, private keys, `.env`, Databricks profiles, or cloud credential files.
+Never commit passwords, access tokens, client secrets, private keys, `.env`, Databricks profiles, kubeconfigs, or cloud credential files.
 
-Use `.env.example` only as a template. For GitHub Actions or cloud deployment, add secrets in GitHub under:
+Use `.env.example` only as a template. Approved GitHub Actions secrets belong under:
 
 `Repository Settings → Secrets and variables → Actions`
 
-See `docs/CREDENTIAL_SETUP.md` for the exact placeholders.
+See `docs/CREDENTIAL_SETUP.md` for environment placeholders and identity guidance.
 
-## 7. Databricks path
+## Databricks deployment path
 
-Install the Databricks CLI, authenticate locally, then validate the development bundle:
+Install the Databricks CLI, authenticate with an approved identity, and validate the development target:
 
 ```bash
 cd databricks
@@ -103,30 +109,25 @@ databricks bundle deploy -t dev
 databricks bundle run hospitality_data_platform_pipeline -t dev
 ```
 
-Do not run staging or production targets until workspace identities, catalog permissions, cluster policies, source volumes, and approvals are configured.
+Do not run staging or production targets until workspace identities, catalog permissions, cluster policies, source volumes, network controls, secrets, and approvals are configured.
 
-## 8. How to explain the project
+## Recommended inspection order
 
-Use this sequence in a technical walkthrough:
+1. `README.md` for scope and verified evidence
+2. `examples/` for generated inputs and outputs
+3. `src/hospitality_data_platform/` for the local implementation
+4. `sql/databricks/` for Spark SQL and lakehouse assets
+5. `databricks/` for managed workflows, MLflow lifecycle, scoring, and rollback
+6. `tests/` and `.github/workflows/ci.yml` for validation controls
+7. `k8s/` for serving availability, scaling, and security controls
+8. `docs/` for architecture, contracts, SLOs, operations, and production boundaries
 
-1. Business problem and platform boundaries
-2. Source generation and replayable Bronze
-3. Silver quality controls and declared grain
-4. Gold analytical products
-5. Point-in-time features and leakage prevention
-6. Model validation and baseline gates
-7. Registry promotion and rollback
-8. API/Kubernetes serving
-9. CI/CD, SLOs, security, incident response, and cost controls
+## Core validation references
 
-## 9. Important evidence files
-
-- `README.md`
-- `PROJECTS.md`
-- `docs/EXECUTIVE_OVERVIEW.md`
-- `docs/IMPLEMENTATION_EVIDENCE.md`
+- `docs/SYSTEM_VALIDATION_WALKTHROUGH.md`
+- `docs/CAPABILITY_MATRIX.md`
+- `docs/ARCHITECTURE.md`
+- `docs/DATA_CONTRACTS.md`
 - `docs/PRODUCTION_SYSTEM_DESIGN.md`
-- `.github/workflows/ci.yml`
-- `tests/`
-- `databricks/`
-- `k8s/`
+- `docs/OPERATIONS_RUNBOOK.md`
+- `docs/PRODUCTION_READINESS.md`
