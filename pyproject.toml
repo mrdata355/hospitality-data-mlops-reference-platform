@@ -6,7 +6,9 @@ build-backend = "setuptools.build_meta"
 name = "hospitality-data-mlops-platform"
 version = "1.1.0"
 description = "Production-style hospitality data and MLOps reference platform"
+readme = "README.md"
 requires-python = ">=3.10"
+authors = [{ name = "Kellon Lewis" }]
 dependencies = [
   "pandas>=2.2",
   "numpy>=2.0",
@@ -15,6 +17,10 @@ dependencies = [
   "fastapi>=0.115",
   "pydantic>=2.8"
 ]
+
+[project.urls]
+Repository = "https://github.com/mrdata355/hospitality-data-mlops-reference-platform"
+Documentation = "https://github.com/mrdata355/hospitality-data-mlops-reference-platform#readme"
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
