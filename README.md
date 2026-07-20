@@ -2,25 +2,25 @@
 
 [![Platform CI](https://github.com/mrdata355/hospitality-data-mlops-reference-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/mrdata355/hospitality-data-mlops-reference-platform/actions/workflows/ci.yml)
 
-**Designed and implemented by:** Kellon Lewis  
+**Maintainer:** Kellon Lewis  
 **Core stack:** Python, SQL, Spark, PySpark, Databricks, Delta Lake, Unity Catalog design, MLflow, FastAPI, Docker, Kubernetes  
 **Release:** 1.1.0
 
 > **Independent reference implementation.** This repository uses deterministic generated data. It contains no real customer records, production credentials, proprietary source mappings, or confidential internal architecture. It does not represent an approved or deployed production system for any real company.
 
-## What this platform demonstrates
+## Platform scope
 
-One integrated hospitality platform connects governed lakehouse data, reusable point-in-time features, Waterfall-style demand forecasting, member-risk modeling, self-service analytical products, MLflow lifecycle controls, batch and API scoring, Kubernetes deployment definitions, monitoring, rollback, and incident response.
+The repository implements one connected hospitality data and MLOps platform spanning governed lakehouse processing, reusable point-in-time features, resort-week forecasting, member-risk modeling, analytical products, MLflow lifecycle controls, batch and API scoring, Kubernetes deployment definitions, monitoring, rollback, and incident response.
 
-It is designed around the exact handoffs between **data engineering, feature engineering, data science, analytics, and MLOps**.
+The system is organized around the technical handoffs between data engineering, feature engineering, data science, analytics, and MLOps.
 
-### Review the evidence
+### Validation and design references
 
-- [Reviewer sample data and outputs](examples/README.md)
-- [Technical showcase](docs/TECHNICAL_SHOWCASE.md)
-- [Target-role evidence matrix](docs/JD_ALIGNMENT.md)
-- [10–15 minute interview demonstration](docs/INTERVIEW_DEMO.md)
-- [Six-project inventory](PROJECTS.md)
+- [Generated sample data and outputs](examples/README.md)
+- [System validation walkthrough](docs/SYSTEM_VALIDATION_WALKTHROUGH.md)
+- [Platform capability matrix](docs/CAPABILITY_MATRIX.md)
+- [Architecture and implementation overview](docs/TECHNICAL_SHOWCASE.md)
+- [Integrated project inventory](PROJECTS.md)
 
 ## Verified evidence
 
@@ -32,14 +32,14 @@ It is designed around the exact handoffs between **data engineering, feature eng
 | Resort-week forecast | WAPE `0.249` |
 | Seasonal baseline | WAPE `0.265` |
 | Source domains | 12 generated operational domains |
-| Visible reviewer samples | 5 source datasets, 3 output datasets, and a validation summary |
+| Visible generated samples | 5 source datasets, 3 output datasets, and a validation summary |
 | Deployment definitions | Databricks, MLflow, Docker, Kubernetes, CI/CD |
 
-GitHub Actions regenerates the synthetic inputs, builds the data products, creates features, trains and evaluates the models, exports the reviewer sample pack, runs tests, and enforces acceptance gates. The repository does not depend on uploaded production data or hidden precomputed results.
+GitHub Actions regenerates the synthetic inputs, builds the data products, creates features, trains and evaluates the models, exports the sample pack, runs tests, and enforces acceptance gates. The repository does not depend on uploaded production data or hidden precomputed results.
 
-## Inspect the mock datasets immediately
+## Generated data and outputs
 
-The committed [`examples/`](examples/README.md) directory lets reviewers inspect generated data and outputs without running the platform first.
+The committed [`examples/`](examples/README.md) directory exposes generated inputs and outputs without requiring the full pipeline to run first.
 
 ### Source samples
 
@@ -52,27 +52,27 @@ The committed [`examples/`](examples/README.md) directory lets reviewers inspect
 ### Output samples
 
 - reusable member-month point-in-time features
-- resort-week Waterfall forecast predictions and errors
+- resort-week forecast predictions and errors
 - data-quality results
 - model metrics, source volumes, drift status, and acceptance gates
 
-The samples are deterministic and synchronized with the pipeline by CI:
+The examples are deterministic and synchronized with the pipeline by CI:
 
 ```bash
 python scripts/run_all.py
 python scripts/export_examples.py
 ```
 
-## Six integrated production projects
+## Integrated platform domains
 
-| Project | Business outcome | Core engineering evidence |
+| Domain | Business outcome | Core engineering evidence |
 |---|---|---|
-| **1. Lakehouse Foundation** | Reliable governed data for ML and analytics | Bronze/Silver/Gold, contracts, quality, dimensions, facts, semantic metrics |
-| **2. Tour and Contract Attribution** | Correct package-to-tour-to-contract conversion reporting | controlled grain, funnel metrics, contract value, ROAS, duplicate prevention |
-| **3. Member Points and Risk** | Reusable member features and churn-risk scores | point-in-time features, batch scoring, FastAPI inference, ROC AUC validation |
-| **4. Resort-Week Forecasting** | Productionalized Waterfall-style demand forecast | lag features, chronological validation, baseline gates, MLflow promotion, rollback |
-| **5. Resort Labor Efficiency** | Staffing and operating-efficiency signals | resort-day model, cost per occupied unit, revenue per labor hour, anomaly flags |
-| **6. MLOps Control Plane** | Reliable model delivery and operations | CI/CD, registry, aliases, batch/API serving, Kubernetes, monitoring, SLOs, runbooks |
+| **Lakehouse foundation** | Reliable governed data for ML and analytics | Bronze/Silver/Gold, contracts, quality, dimensions, facts, semantic metrics |
+| **Tour and contract attribution** | Correct package-to-tour-to-contract conversion reporting | controlled grain, funnel metrics, contract value, ROAS, duplicate prevention |
+| **Member points and risk** | Reusable member features and churn-risk scores | point-in-time features, batch scoring, FastAPI inference, ROC AUC validation |
+| **Resort-week forecasting** | Controlled demand-forecast lifecycle | lag features, chronological validation, baseline gates, MLflow promotion, rollback |
+| **Resort labor efficiency** | Staffing and operating-efficiency signals | resort-day model, cost per occupied unit, revenue per labor hour, anomaly flags |
+| **MLOps control plane** | Reliable model delivery and operations | CI/CD, registry, aliases, batch/API serving, Kubernetes, monitoring, SLOs, runbooks |
 
 ## Architecture
 
@@ -97,24 +97,26 @@ flowchart LR
     P --> Q[Rollback and incident response]
 ```
 
-## Role-alignment snapshot
+## Platform capability snapshot
 
-| Requirement | Repository evidence |
+| Capability | Repository evidence |
 |---|---|
 | SQL, Python, Spark, PySpark | Modular local implementation plus parameterized Databricks Spark and SQL workloads |
 | Reusable ML features | Member-month and resort-week feature products with declared grains |
-| Batch and streaming | Deterministic batch path and Auto Loader streaming-ingestion reference |
+| Batch and streaming patterns | Deterministic batch path and Auto Loader streaming-ingestion reference |
 | Data modeling | Conformed dimensions, atomic facts, Gold marts, and semantic metrics |
 | Data quality | schema, null, uniqueness, FK, grain, missingness, drift, and model gates |
 | Feature lineage | source metadata, record hashes, entity keys, event-time cutoffs, and documented contracts |
 | Training/inference consistency | shared feature lists, point-in-time rules, API schema validation, and model signatures |
-| Feature Store and catalog | Unity Catalog feature schemas and reusable point-in-time tables |
-| Waterfall model | chronological validation, seasonal baseline, MLflow candidate, promotion, scoring, and rollback |
+| Feature catalog design | Unity Catalog feature schemas and reusable point-in-time tables |
+| Forecast lifecycle | chronological validation, seasonal baseline, MLflow candidate, promotion, scoring, and rollback |
 | CI/CD and MLOps | GitHub Actions, model acceptance, versioning, sample synchronization, monitoring, and runbooks |
 | Kubernetes | non-root container, probes, HPA, PDB, topology spread, NetworkPolicy, and resources |
-| Azure readiness | Databricks targets, AKS patterns, workload-identity placeholder, and secret boundaries |
+| Azure-oriented deployment path | Databricks targets, AKS patterns, workload-identity placeholder, and secret boundaries |
 
-## Reviewer quick start
+See [`docs/CAPABILITY_MATRIX.md`](docs/CAPABILITY_MATRIX.md) for the complete implementation index.
+
+## Local execution
 
 The complete local path works without Azure, Databricks, MLflow, or Kubernetes credentials.
 
@@ -177,7 +179,7 @@ Signals include 1-, 4-, 13-, and 52-week lags, 4- and 13-week rolling means, sea
 - managed deployment records model signatures and aliases
 - tests verify grain, sample safety, and missing lag behavior
 
-## Production MLOps controls
+## MLOps controls
 
 - isolated development, staging, and production catalogs
 - Databricks Asset Bundle variables and workflow ordering
@@ -197,8 +199,8 @@ examples/                       compact generated inputs, outputs, metrics, and 
 src/hospitality_data_platform/  local pipeline, features, models, API, monitoring
 sql/databricks/                 Spark SQL ingestion, MERGE, dimensions, Gold, features, monitoring
 databricks/                     Asset Bundle, workflows, training, promotion, scoring, rollback
-components/                     ownership and interface documentation for the six projects
-docs/                           showcase, JD evidence, architecture, contracts, SLOs, runbooks, ADRs
+components/                     ownership and interface documentation for the integrated domains
+docs/                           architecture, contracts, capability index, SLOs, runbooks, ADRs
 tests/                          data, feature, model, API, examples, and deployment-asset validation
 k8s/                            deployment, service, autoscaling, disruption and network controls
 loadtest/                       representative API load and response-contract validation
@@ -230,10 +232,10 @@ The managed path requires authorized infrastructure, source volumes, identities,
 
 ## Documentation
 
-- [Reviewer sample data and outputs](examples/README.md)
-- [Technical showcase](docs/TECHNICAL_SHOWCASE.md)
-- [JD alignment](docs/JD_ALIGNMENT.md)
-- [Interview demonstration](docs/INTERVIEW_DEMO.md)
+- [Generated sample data and outputs](examples/README.md)
+- [System validation walkthrough](docs/SYSTEM_VALIDATION_WALKTHROUGH.md)
+- [Platform capability matrix](docs/CAPABILITY_MATRIX.md)
+- [Architecture and implementation overview](docs/TECHNICAL_SHOWCASE.md)
 - [Executive overview](docs/EXECUTIVE_OVERVIEW.md)
 - [Implementation evidence](docs/IMPLEMENTATION_EVIDENCE.md)
 - [System design](docs/PRODUCTION_SYSTEM_DESIGN.md)
