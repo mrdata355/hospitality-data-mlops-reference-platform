@@ -1,0 +1,67 @@
+version: 1
+
+defaults:
+  output_format: delta
+  target_file_size_mib: 256
+  history_days: 730
+  anomaly_basis_points:
+    duplicate_rows: 5
+    null_business_fields: 10
+    late_arrivals: 100
+    hot_resort_records: 1500
+
+profiles:
+  sample:
+    description: Credential-free local or development smoke profile.
+    target_logical_bytes: 67108864
+    require_large_run_confirmation: false
+  100gb:
+    description: Integration-scale run used before any terabyte benchmark.
+    target_logical_bytes: 107374182400
+    require_large_run_confirmation: true
+  1tb:
+    description: First distributed scale and cost-validation gate.
+    target_logical_bytes: 1099511627776
+    require_large_run_confirmation: true
+  10tb:
+    description: Final controlled benchmark after the 1 TB gate passes.
+    target_logical_bytes: 10995116277760
+    require_large_run_confirmation: true
+
+domains:
+  members:
+    weight: 0.03
+    estimated_row_bytes: 144
+  reservations:
+    weight: 0.18
+    estimated_row_bytes: 224
+  stays:
+    weight: 0.12
+    estimated_row_bytes: 192
+  points_transactions:
+    weight: 0.16
+    estimated_row_bytes: 160
+  tour_events:
+    weight: 0.08
+    estimated_row_bytes: 176
+  contracts:
+    weight: 0.07
+    estimated_row_bytes: 184
+  marketing_touches:
+    weight: 0.10
+    estimated_row_bytes: 168
+  service_cases:
+    weight: 0.06
+    estimated_row_bytes: 208
+  labor_shifts:
+    weight: 0.05
+    estimated_row_bytes: 144
+  inventory_snapshots:
+    weight: 0.04
+    estimated_row_bytes: 128
+  payments:
+    weight: 0.08
+    estimated_row_bytes: 176
+  web_events:
+    weight: 0.03
+    estimated_row_bytes: 152
