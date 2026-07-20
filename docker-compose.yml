@@ -1,16 +1,21 @@
 services:
   member-risk-api:
-    build: .
+    build:
+      context: .
     image: hospitality-data-platform-api:local
+    init: true
+    restart: unless-stopped
     ports:
       - "8080:8080"
     environment:
       APP_ENV: local
       LOG_LEVEL: INFO
+      MODEL_SOURCE: local
       MODEL_ALIAS: Champion
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/ready')"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/ready', timeout=3)"]
       interval: 30s
       timeout: 5s
       retries: 3
-      start_period: 10s
+      start_period: 15s
+    stop_grace_period: 30s
