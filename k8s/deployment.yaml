@@ -62,14 +62,9 @@ spec:
             - name: APP_ENV
               value: production
             - name: MODEL_SOURCE
-              value: mlflow
+              value: local
             - name: MODEL_ALIAS
               value: Champion
-            - name: MODEL_URI
-              valueFrom:
-                secretKeyRef:
-                  name: member-risk-model-config
-                  key: model-uri
           resources:
             requests:
               cpu: "250m"
