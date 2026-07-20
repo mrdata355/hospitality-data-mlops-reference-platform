@@ -1,4 +1,4 @@
-.PHONY: install run test validate api loadtest clean
+.PHONY: install run examples test validate api loadtest clean
 
 install:
 	python -m pip install -r requirements.txt
@@ -6,10 +6,13 @@ install:
 run:
 	python scripts/run_all.py
 
+examples:
+	python scripts/export_examples.py
+
 test:
 	pytest -q
 
-validate: run test
+validate: run examples test
 
 api:
 	uvicorn hospitality_data_platform.api:app --app-dir src --reload --port 8080
