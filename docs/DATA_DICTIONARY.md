@@ -50,10 +50,13 @@
 | points_redeemed_12m | Redeemed points in the prior 12 months |
 | points_expired_12m | Expired points in the prior 12 months |
 | points_utilization_rate | Redeemed divided by earned |
-| stays_12m | Completed stays in the prior 12 months |
+| stays_12m | Eligible stays in the prior 12 months |
 | room_nights_12m | Room nights in the prior 12 months |
+| net_room_revenue_12m | Net room revenue in the prior 12 months |
+| avg_booking_lead_days_12m | Average non-negative days between booking and check-in for eligible stays in the prior 12 months; zero when no eligible stay exists |
 | service_cases_90d | Cases in the prior 90 days |
 | escalated_cases_90d | Escalated cases in the prior 90 days |
+| avg_resolution_hours_90d | Average case resolution hours in the prior 90 days |
 | days_since_last_booking | Days since latest booking before cutoff |
 | churn_label | Generated future inactivity label; never used as a feature |
 
