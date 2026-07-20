@@ -1,8 +1,9 @@
 # Core platform dependencies.
 -r requirements.txt
 
-# Engineering quality, security, and performance validation.
-locust>=2.31
-ruff>=0.6
-mypy>=1.11
-pip-audit>=2.7
+# Engineering quality, security, coverage, and performance validation.
+locust==2.46.0
+ruff==0.15.22
+mypy==2.3.0
+pip-audit==2.10.1
+pytest-cov==7.1.0
