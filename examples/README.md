@@ -8,7 +8,7 @@ This directory provides a compact, public-safe snapshot of the credential-free p
 
 | File | Grain | What it demonstrates |
 |---|---|---|
-| `sample_data/members_sample.csv` | one row per member | tier, market, tenure inputs without names, emails, or phone numbers |
+| `sample_data/members_sample.csv` | one row per member | tier, market, and tenure inputs without names, emails, or phone numbers |
 | `sample_data/reservations_sample.csv` | one row per reservation | booking and stay dates, resort linkage, status, nights, points, and revenue |
 | `sample_data/points_transactions_sample.csv` | one row per points transaction | earning, redemption, expiration, and adjustment activity |
 | `sample_data/tour_events_sample.csv` | one row per tour event | package-to-prospect linkage, tour status, date, and market |
@@ -18,7 +18,7 @@ This directory provides a compact, public-safe snapshot of the credential-free p
 
 | File | Grain | What it demonstrates |
 |---|---|---|
-| `sample_outputs/member_month_features_sample.csv` | member + as-of month | reusable point-in-time features and generated validation label |
+| `sample_outputs/member_month_features_sample.csv` | member + as-of month | reusable point-in-time features, including average booking lead time, and the generated validation label |
 | `sample_outputs/waterfall_forecast_sample.csv` | resort + forecast week + run | actuals, predictions, error, model alias, and scoring metadata |
 | `sample_outputs/data_quality_results.csv` | table + quality check | schema, key, null, and referential-integrity outcomes |
 | `sample_outputs/validation_summary.json` | one validation run | source volumes, model metrics, monitoring status, and acceptance gates |
