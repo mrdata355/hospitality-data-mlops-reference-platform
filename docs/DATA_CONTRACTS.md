@@ -41,8 +41,10 @@ Every source and data product has an owner, declared grain, business key, requir
 
 - member tenure, tier, and home market
 - points earned, redeemed, expired, utilization, and expired share
-- stay count, room nights, revenue, and booking recency
+- stay count, room nights, revenue, average booking lead time, and booking recency
 - service case count, escalations, and resolution duration
+
+**Booking lead-time rule:** `avg_booking_lead_days_12m` is the average non-negative number of days between `booking_date` and `check_in_date` for eligible stays with check-in dates in the 12 months before `as_of_month`. Members without eligible stays receive `0`.
 
 ### `features.waterfall_resort_week_features`
 
