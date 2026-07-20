@@ -23,6 +23,8 @@ dist/
 *.pfx
 .databrickscfg
 kubeconfig*
+*.tfstate
+*.tfstate.*
 
 # Databricks / MLflow
 .databricks/
@@ -41,6 +43,11 @@ artifacts/figures/
 artifacts/*.sqlite
 artifacts/*.json
 artifacts/*.txt
+
+# Scale benchmark bulk output and unreviewed run evidence
+benchmark-output/
+benchmarks/lakehouse_scale/output/
+benchmarks/lakehouse_scale/evidence/runs/
 
 # Runtime and load-test output
 *.log
