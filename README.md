@@ -31,6 +31,10 @@ This flagship repository contains six independently reviewable projects: lakehou
 | Databricks deployment definitions | Included and statically validated | isolated catalogs, runtime parameters, feature build, acceptance gate, alias promotion, scoring, monitoring |
 | Managed cloud deployment | Environment-dependent | requires approved authorized customer cloud resources and credentials |
 
+## Repository validation model
+
+The source repository does not commit generated datasets or trained artifacts. GitHub Actions regenerates synthetic inputs, executes the full pipeline, trains and evaluates the models, runs automated tests, and enforces model acceptance thresholds on every pull request. This makes the published evidence reproducible from code rather than dependent on pre-generated outputs.
+
 ## Controlled delivery path
 
 1. Source-aligned Bronze ingestion with batch metadata, record hashes, checkpoints, and replay support.
