@@ -1,0 +1,1 @@
+"""Hospitality lakehouse scale benchmark."""
