@@ -2,20 +2,35 @@ services:
   member-risk-api:
     build:
       context: .
-    image: hospitality-data-platform-api:local
+      args:
+        SERVICE_VERSION: ${SERVICE_VERSION:-1.1.0}
+        VCS_REF: ${BUILD_SHA:-local-dev}
+        BUILD_DATE: ${BUILD_DATE:-local}
+    image: hospitality-data-platform-api:${SERVICE_VERSION:-local}
     init: true
     restart: unless-stopped
+    user: "10001:10001"
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 100
     ports:
       - "8080:8080"
     environment:
-      APP_ENV: local
-      LOG_LEVEL: INFO
+      APP_ENV: ${APP_ENV:-local-container}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
       MODEL_SOURCE: local
       MODEL_ALIAS: Champion
+      SERVICE_VERSION: ${SERVICE_VERSION:-1.1.0}
+      BUILD_SHA: ${BUILD_SHA:-local-dev}
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/ready', timeout=3)"]
-      interval: 30s
+      interval: 15s
       timeout: 5s
-      retries: 3
+      retries: 5
       start_period: 15s
     stop_grace_period: 30s
