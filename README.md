@@ -10,7 +10,7 @@
 
 ## Platform scope
 
-The repository implements one connected hospitality data and MLOps platform spanning governed lakehouse processing, reusable point-in-time features, resort-week forecasting, member-risk modeling, analytical products, MLflow lifecycle controls, batch and API scoring, Kubernetes deployment definitions, monitoring, rollback, and incident response.
+The repository implements one connected hospitality data and MLOps platform spanning governed lakehouse processing, reusable point-in-time features, resort-week forecasting, member-risk modeling, analytical products, MLflow lifecycle controls, batch and API scoring, secured container serving, Kubernetes deployment definitions, monitoring, rollback, and incident response.
 
 The system is organized around the technical handoffs between data engineering, feature engineering, data science, analytics, and MLOps.
 
@@ -18,6 +18,7 @@ The system is organized around the technical handoffs between data engineering, 
 
 - [Generated sample data and outputs](examples/README.md)
 - [System validation walkthrough](docs/SYSTEM_VALIDATION_WALKTHROUGH.md)
+- [Serving validation and release controls](docs/SERVING_VALIDATION.md)
 - [Platform capability matrix](docs/CAPABILITY_MATRIX.md)
 - [Architecture and implementation overview](docs/TECHNICAL_SHOWCASE.md)
 - [Integrated project inventory](PROJECTS.md)
@@ -27,15 +28,17 @@ The system is organized around the technical handoffs between data engineering, 
 | Evidence | Result |
 |---|---:|
 | Deterministic pipeline | Working credential-free execution path |
-| Automated validation | Pipeline, grain, feature, model, API, sample-pack, and deployment tests |
-| Member-risk model | ROC AUC `0.811` |
+| Automated validation | Pipeline, grain, feature, model, API, sample-pack, deployment, and serving tests |
+| Member-risk model | ROC AUC `0.810+` after the booking lead-time feature expansion |
 | Resort-week forecast | WAPE `0.249` |
 | Seasonal baseline | WAPE `0.265` |
 | Source domains | 12 generated operational domains |
 | Visible generated samples | 5 source datasets, 3 output datasets, and a validation summary |
-| Deployment definitions | Databricks, MLflow, Docker, Kubernetes, CI/CD |
+| Running-container release gate | Docker image must build, start, become ready, score, expose metrics, and pass security checks |
+| Versioned image release | GitHub Container Registry workflow with multi-architecture builds, provenance, and SBOM |
+| Deployment definitions | Databricks, MLflow, Docker Compose, Kubernetes, CI/CD |
 
-GitHub Actions regenerates the synthetic inputs, builds the data products, creates features, trains and evaluates the models, exports the sample pack, runs tests, and enforces acceptance gates. The repository does not depend on uploaded production data or hidden precomputed results.
+GitHub Actions regenerates the synthetic inputs, builds the data products, creates features, trains and evaluates the models, exports the sample pack, runs tests, transfers the validated model artifact into a clean serving job, builds the Docker image, runs it with restricted privileges, and executes an end-to-end scoring smoke test. The CI badge is green only when both model validation and actual container serving succeed.
 
 ## Generated data and outputs
 
@@ -72,7 +75,7 @@ python scripts/export_examples.py
 | **Member points and risk** | Reusable member features and churn-risk scores | point-in-time features, batch scoring, FastAPI inference, ROC AUC validation |
 | **Resort-week forecasting** | Controlled demand-forecast lifecycle | lag features, chronological validation, baseline gates, MLflow promotion, rollback |
 | **Resort labor efficiency** | Staffing and operating-efficiency signals | resort-day model, cost per occupied unit, revenue per labor hour, anomaly flags |
-| **MLOps control plane** | Reliable model delivery and operations | CI/CD, registry, aliases, batch/API serving, Kubernetes, monitoring, SLOs, runbooks |
+| **MLOps control plane** | Reliable model delivery and operations | CI/CD, registry, aliases, container serving, Kubernetes, monitoring, SLOs, runbooks |
 
 ## Architecture
 
@@ -86,15 +89,17 @@ flowchart LR
     F --> G[Member-risk training]
     F --> H[Resort-week forecasting]
     H --> I[Threshold and seasonal-baseline gates]
-    G --> J[Model artifacts and batch scores]
+    G --> J[Validated model artifact]
     I --> K[MLflow registered candidate]
     K --> L[Champion alias]
-    L --> M[Batch forecast scoring]
-    L --> N[FastAPI model serving]
-    E --> O[Semantic metrics and self-service analytics]
-    M --> P[Accuracy and drift monitoring]
-    N --> P
-    P --> Q[Rollback and incident response]
+    J --> M[Secured Docker image]
+    M --> N[FastAPI model serving]
+    L --> O[Batch forecast scoring]
+    E --> P[Semantic metrics and self-service analytics]
+    N --> Q[Serving metrics and smoke evidence]
+    O --> R[Accuracy and drift monitoring]
+    Q --> S[Kubernetes deployment and release controls]
+    R --> T[Rollback and incident response]
 ```
 
 ## Platform capability snapshot
@@ -110,15 +115,16 @@ flowchart LR
 | Training/inference consistency | shared feature lists, point-in-time rules, API schema validation, and model signatures |
 | Feature catalog design | Unity Catalog feature schemas and reusable point-in-time tables |
 | Forecast lifecycle | chronological validation, seasonal baseline, MLflow candidate, promotion, scoring, and rollback |
-| CI/CD and MLOps | GitHub Actions, model acceptance, versioning, sample synchronization, monitoring, and runbooks |
-| Kubernetes | non-root container, probes, HPA, PDB, topology spread, NetworkPolicy, and resources |
+| CI/CD and MLOps | GitHub Actions, artifact handoff, model acceptance, container smoke test, release versioning, and evidence retention |
+| Container serving | fixed non-root identity, read-only filesystem, dropped capabilities, readiness, version metadata, score test, and metrics |
+| Kubernetes | versioned GHCR image, probes, HPA, PDB, topology spread, NetworkPolicy, workload identity, and resources |
 | Azure-oriented deployment path | Databricks targets, AKS patterns, workload-identity placeholder, and secret boundaries |
 
 See [`docs/CAPABILITY_MATRIX.md`](docs/CAPABILITY_MATRIX.md) for the complete implementation index.
 
-## Local execution
+## Local validation
 
-The complete local path works without Azure, Databricks, MLflow, or Kubernetes credentials.
+The complete local path works without Azure, Databricks, MLflow, Kubernetes, or registry credentials.
 
 ```bash
 python -m venv .venv
@@ -130,15 +136,31 @@ make api
 
 `make validate` generates all 12 source domains, builds the pipeline, exports the sample pack, trains both models, and runs the complete test suite.
 
-Inspect:
+Inspect the direct application process:
 
 ```text
 http://localhost:8080/docs
 http://localhost:8080/health
 http://localhost:8080/ready
+http://localhost:8080/version
 http://localhost:8080/model-info
 http://localhost:8080/metrics
 ```
+
+## Production-style container serving
+
+Generate the local model, build the hardened image, start the service, and execute the same contract test used by CI:
+
+```bash
+python scripts/run_all.py
+BUILD_SHA=local-test SERVICE_VERSION=1.1.0 docker compose up --build -d
+python scripts/smoke_test_serving.py \
+  --base-url http://localhost:8080 \
+  --evidence artifacts/serving/local-smoke.json
+docker compose down
+```
+
+The container runs as UID/GID `10001`, with a read-only root filesystem, an in-memory `/tmp`, no Linux capabilities, no privilege escalation, a process limit, and a readiness healthcheck.
 
 ## End-to-end delivery path
 
@@ -151,10 +173,12 @@ http://localhost:8080/metrics
 7. Build leakage-safe member-month and resort-week features.
 8. Train and validate member-risk and forecasting models.
 9. Reject forecast candidates that fail the absolute WAPE or seasonal-baseline gates.
-10. Register and promote accepted model versions through a controlled alias.
-11. Publish batch predictions and expose optional synchronous scoring.
-12. Monitor drift, accuracy, bias, score distribution, API errors, and latency.
-13. Preserve the prior validated model and serving output for rollback.
+10. Transfer only the validated model artifact into the serving build job.
+11. Build an immutable image with service version, source commit, healthcheck, and non-root identity.
+12. Run the image with production-style restrictions and verify health, readiness, version, model metadata, scoring, and metrics.
+13. Publish versioned multi-architecture images on approved release tags.
+14. Deploy through Kubernetes rolling updates and monitor accuracy, drift, latency, errors, and availability.
+15. Preserve prior model and application versions for independent rollback.
 
 ## Feature engineering design
 
@@ -162,7 +186,7 @@ http://localhost:8080/metrics
 
 **Grain:** one row per member and as-of month.
 
-Signals include tenure, tier, points earned, redeemed and expired, utilization, stays, room nights, revenue, service cases, escalations, resolution duration, and booking recency.
+Signals include tenure, tier, points earned, redeemed and expired, utilization, stays, room nights, revenue, average booking lead time, service cases, escalations, resolution duration, and booking recency.
 
 ### Resort-week feature product
 
@@ -176,8 +200,9 @@ Signals include 1-, 4-, 13-, and 52-week lags, 4- and 13-week rolling means, sea
 - labels are excluded from feature lists
 - model inputs use explicit names and types
 - API requests use a validated schema
+- local, PySpark, and Spark SQL feature definitions remain aligned
+- tests recompute booking lead time directly from Silver stay records
 - managed deployment records model signatures and aliases
-- tests verify grain, sample safety, and missing lag behavior
 
 ## MLOps controls
 
@@ -187,9 +212,11 @@ Signals include 1-, 4-, 13-, and 52-week lags, 4- and 13-week rolling means, sea
 - objective acceptance gates before alias movement
 - retained previous version for rollback
 - batch-first inference for forecast and broad score refreshes
-- FastAPI liveness, readiness, model metadata, scoring, and metrics
-- non-root Docker runtime
-- Kubernetes rolling deployment, HPA, PDB, topology spreading, and NetworkPolicy
+- FastAPI liveness, readiness, version, model metadata, scoring, request IDs, and metrics
+- non-root image with OCI source, version, build date, and commit labels
+- CI model-artifact handoff followed by actual restricted-container serving
+- versioned GHCR release workflow with multi-architecture builds, provenance, and SBOM
+- Kubernetes rolling deployment, HPA, PDB, topology spreading, workload identity, and NetworkPolicy
 - SLOs, incident severity, replay procedures, security guidance, and cost controls
 
 ## Repository map
@@ -200,11 +227,11 @@ src/hospitality_data_platform/  local pipeline, features, models, API, monitorin
 sql/databricks/                 Spark SQL ingestion, MERGE, dimensions, Gold, features, monitoring
 databricks/                     Asset Bundle, workflows, training, promotion, scoring, rollback
 components/                     ownership and interface documentation for the integrated domains
-docs/                           architecture, contracts, capability index, SLOs, runbooks, ADRs
-tests/                          data, feature, model, API, examples, and deployment-asset validation
-k8s/                            deployment, service, autoscaling, disruption and network controls
+docs/                           architecture, contracts, serving validation, SLOs, runbooks, ADRs
+tests/                          data, feature, model, API, examples, serving, and deployment validation
+k8s/                            versioned deployment, service, autoscaling, disruption and network controls
 loadtest/                       representative API load and response-contract validation
-.github/                        CI/CD and repository release controls
+.github/                        CI validation and versioned container release workflows
 ```
 
 ## Managed Databricks path
@@ -234,6 +261,7 @@ The managed path requires authorized infrastructure, source volumes, identities,
 
 - [Generated sample data and outputs](examples/README.md)
 - [System validation walkthrough](docs/SYSTEM_VALIDATION_WALKTHROUGH.md)
+- [Serving validation and release controls](docs/SERVING_VALIDATION.md)
 - [Platform capability matrix](docs/CAPABILITY_MATRIX.md)
 - [Architecture and implementation overview](docs/TECHNICAL_SHOWCASE.md)
 - [Executive overview](docs/EXECUTIVE_OVERVIEW.md)
