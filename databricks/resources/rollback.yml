@@ -1,0 +1,24 @@
+resources:
+  jobs:
+    hospitality_data_platform_model_rollback:
+      name: hospitality_data_platform_model_rollback_${bundle.target}
+      max_concurrent_runs: 1
+      job_clusters:
+        - job_cluster_key: rollback_job_cluster
+          new_cluster:
+            spark_version: ${var.spark_version}
+            node_type_id: ${var.node_type_id}
+            num_workers: 1
+            autotermination_minutes: 15
+            spark_env_vars:
+              PLATFORM_CATALOG: ${var.catalog}
+      tasks:
+        - task_key: rollback_waterfall
+          job_cluster_key: rollback_job_cluster
+          spark_python_task:
+            python_file: ../src_databricks/rollback_waterfall.py
+            parameters:
+              - --catalog
+              - ${var.catalog}
+              - --model-alias
+              - Champion

@@ -5,9 +5,9 @@
 **Designed and implemented by:** Kellon Lewis  
 **Runtime:** Python 3.10+, Databricks, Delta Lake, MLflow, FastAPI, Kubernetes  
 **Release:** 1.1.0  
-**Verification date:** July 20, 2026
+**Verification date:** July 10, 2026
 
-> **Independent reference implementation.** This repository was independently developed by Kellon Lewis using generated, non-production validation data. It does not contain customer records, credentials, proprietary source-system specifications, or confidential internal architecture, and it does not represent an approved or deployed production system.
+> **Independent reference implementation.** This repository was independently developed by Kellon Lewis using generated, non-production validation data. It does not contain real customer records, credentials, proprietary source-system specifications, or confidential internal architecture, and it does not represent an approved or deployed production system for any real company. It is a production-style technical demonstration designed for hospitality and vacation-ownership use cases.
 
 ## Executive purpose
 
@@ -15,18 +15,9 @@ The platform demonstrates how resort, reservation, member, points, marketing, to
 
 The implementation is intended to show both hands-on engineering depth and architectural judgment. It includes a deterministic local execution path that can be verified without recurring cloud cost and a parameterized Databricks deployment path that requires approved workspace access, source connections, identities, and environment credentials.
 
-## Six connected projects
+## Six integrated projects
 
-This is one flagship platform containing six independently reviewable projects:
-
-1. Lakehouse Foundation
-2. Tour and Contract Attribution
-3. Member Points and Risk
-4. Resort-Week Demand Forecasting
-5. Resort Labor Efficiency
-6. Production MLOps Control Plane
-
-See [`PROJECTS.md`](PROJECTS.md) for the detailed inventory.
+This flagship repository contains six independently reviewable projects: lakehouse foundation, tour and contract attribution, member points and risk, resort-week demand forecasting, resort labor efficiency, and a production MLOps control plane. See [`PROJECTS.md`](PROJECTS.md) for the scope and interview walkthrough of each project.
 
 ## Verification status
 
@@ -38,7 +29,7 @@ See [`PROJECTS.md`](PROJECTS.md) for the detailed inventory.
 | Resort-week forecast | Verified | WAPE 0.249 vs. 0.265 seasonal baseline |
 | FastAPI scoring contract | Verified locally | health, readiness, model metadata, validation, score response |
 | Databricks deployment definitions | Included and statically validated | isolated catalogs, runtime parameters, feature build, acceptance gate, alias promotion, scoring, monitoring |
-| Managed cloud deployment | Environment-dependent | requires approved cloud resources and credentials |
+| Managed cloud deployment | Environment-dependent | requires approved authorized customer cloud resources and credentials |
 
 ## Controlled delivery path
 
@@ -48,22 +39,22 @@ See [`PROJECTS.md`](PROJECTS.md) for the detailed inventory.
 4. Gold marts for resort performance, campaign attribution, points utilization, and labor efficiency.
 5. Point-in-time feature products for member risk and resort-week forecasting.
 6. Chronological validation, seasonal-baseline comparison, absolute acceptance thresholds, immutable model versions, and controlled MLflow alias promotion.
-7. Batch scoring, optional REST serving, model and data monitoring, retained rollback targets, and operational runbooks.
-8. Development, staging, and production isolation through Databricks Asset Bundle variables and environment-specific Unity Catalog catalogs.
+7. Batch scoring, optional REST serving, model/data monitoring, retained rollback targets, and operational runbooks.
+8. Dev, staging, and production isolation through Databricks Asset Bundle variables and environment-specific Unity Catalog catalogs.
 
 ## Repository map
 
 ```text
-src/hospitality_data_platform/ local pipeline, features, models, API, monitoring
-sql/databricks/                 parameterized ingestion, MERGE, dimensional, Gold, feature, monitoring SQL
-databricks/                     Asset Bundle, environment variables, workflow, promotion, rollback
-components/                     ownership and interface documentation for six projects
-docs/                           architecture, contracts, SLOs, operations, security, ADRs
-data/                           generated validation inputs and outputs
-artifacts/                      generated models, metrics, predictions, monitoring, SQLite database
-tests/                          pipeline, grain, feature, model, API, and deployment validation
-k8s/                            deployment, service, HPA, probes, and resource controls
-.github/workflows/              continuous integration gates
+src/hospitality_data_platform/        local pipeline, features, models, API, monitoring
+sql/databricks/               parameterized catalog, ingestion, MERGE, dimensional, Gold, feature, monitoring SQL
+databricks/                   Asset Bundle, environment variables, workflow and model promotion code
+components/                   component ownership and interface documentation
+docs/                         executive overview, architecture, contracts, SLOs, operations, security, ADRs
+data/                         generated validation inputs and Bronze/Silver/Gold outputs
+artifacts/                    models, metrics, predictions, monitoring, SQLite serving database
+tests/                        pipeline, grain, feature, model, API, and deployment-asset validation
+k8s/                          deployment, service, HPA, probes, and resource controls
+.github/workflows/            continuous integration gates
 ```
 
 ## Architecture
@@ -87,7 +78,13 @@ flowchart LR
     E --> O[BI and semantic metrics]
 ```
 
+## Guided setup
+
+Start with [`START_HERE.md`](START_HERE.md), then use [`docs/CREDENTIAL_SETUP.md`](docs/CREDENTIAL_SETUP.md) when approved credentials are available.
+
 ## Local verification
+
+The local path runs against generated fixtures and does not require a cloud account.
 
 ```bash
 python -m venv .venv
@@ -112,20 +109,39 @@ GET  /model-info
 POST /score/member-churn
 ```
 
+The service defaults to the packaged local model. A managed deployment can set `MODEL_SOURCE=mlflow` and provide a registered `MODEL_URI` without changing the API contract.
+
 ## Databricks deployment path
+
+The bundle defines isolated catalogs for `dev`, `staging`, and `prod`. Every Python workload receives the active catalog at runtime. The forecast workflow builds its own resort-week features, validates the candidate against both an absolute WAPE threshold and a seasonal baseline, records candidate evidence, moves the `Champion` alias only after acceptance, retains the previous alias version as the rollback target, scores the approved model, and writes monitoring results.
 
 ```bash
 cd databricks
 databricks bundle validate -t dev
 databricks bundle deploy -t dev
 databricks bundle run hospitality_data_platform_pipeline -t dev
+
+databricks bundle validate -t staging
+databricks bundle deploy -t staging
+databricks bundle run hospitality_data_platform_pipeline -t staging
 ```
 
-Production promotion requires an authorized release owner, workspace policies, managed identities, approved source volumes, and a change record.
+Production promotion additionally requires an authorized release owner, workspace policies, managed identities, approved source volumes, and a change record.
+
+## Data products and grains
+
+| Data product | Declared grain | Primary use |
+|---|---|---|
+| `gold.resort_monthly_performance` | resort + calendar month | executive resort performance |
+| `gold.campaign_tour_sales_attribution` | campaign + channel + market + month | package, tour, and contract attribution |
+| `gold.member_points_utilization` | member + calendar month | retention and points engagement |
+| `gold.resort_labor_efficiency` | resort + business date | staffing and operating efficiency |
+| `features.member_month_features` | member + as-of month | member risk and upgrade models |
+| `features.waterfall_resort_week_features` | resort + forecast week | arrivals forecasting |
+| `gold.waterfall_forecast_resort_week` | resort + forecast week + run | planning and forecast monitoring |
 
 ## Review documents
 
-- [Project inventory](PROJECTS.md)
 - [Executive overview](docs/EXECUTIVE_OVERVIEW.md)
 - [Implementation evidence](docs/IMPLEMENTATION_EVIDENCE.md)
 - [System design guide](docs/PRODUCTION_SYSTEM_DESIGN.md)
@@ -134,5 +150,7 @@ Production promotion requires an authorized release owner, workspace policies, m
 - [Deployment and release management](docs/DEPLOYMENT.md)
 - [Service levels and monitoring](docs/SLO_SLA.md)
 - [Operations runbook](docs/OPERATIONS_RUNBOOK.md)
+- [Incident response](docs/INCIDENT_RESPONSE.md)
 - [Security and governance](docs/SECURITY_GOVERNANCE.md)
+- [Cost controls](docs/COST_CONTROL.md)
 - [Production readiness checklist](docs/PRODUCTION_READINESS.md)

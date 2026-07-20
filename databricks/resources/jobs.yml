@@ -1,0 +1,86 @@
+resources:
+  jobs:
+    hospitality_data_platform_pipeline:
+      name: hospitality_data_platform_pipeline_${bundle.target}
+      max_concurrent_runs: 1
+      tags:
+        system: hospitality-reference-platform
+        owner: kellon-lewis
+        environment: ${bundle.target}
+      job_clusters:
+        - job_cluster_key: shared_job_cluster
+          new_cluster:
+            spark_version: ${var.spark_version}
+            node_type_id: ${var.node_type_id}
+            autoscale:
+              min_workers: 1
+              max_workers: 4
+            autotermination_minutes: 15
+            spark_env_vars:
+              PLATFORM_CATALOG: ${var.catalog}
+      tasks:
+        - task_key: build_member_features
+          job_cluster_key: shared_job_cluster
+          spark_python_task:
+            python_file: ../src_databricks/build_member_features.py
+            parameters:
+              - --catalog
+              - ${var.catalog}
+              - --as-of-month
+              - ${var.as_of_month}
+
+        - task_key: build_waterfall_features
+          job_cluster_key: shared_job_cluster
+          spark_python_task:
+            python_file: ../src_databricks/build_waterfall_features.py
+            parameters:
+              - --catalog
+              - ${var.catalog}
+
+        - task_key: train_waterfall
+          depends_on:
+            - task_key: build_waterfall_features
+          job_cluster_key: shared_job_cluster
+          spark_python_task:
+            python_file: ../src_databricks/train_waterfall.py
+            parameters:
+              - --catalog
+              - ${var.catalog}
+              - --max-wape
+              - ${var.max_forecast_wape}
+              - --require-baseline-improvement
+              - "true"
+
+        - task_key: promote_waterfall
+          depends_on:
+            - task_key: train_waterfall
+          job_cluster_key: shared_job_cluster
+          spark_python_task:
+            python_file: ../src_databricks/promote_waterfall.py
+            parameters:
+              - --catalog
+              - ${var.catalog}
+              - --model-alias
+              - Champion
+
+        - task_key: batch_score
+          depends_on:
+            - task_key: promote_waterfall
+          job_cluster_key: shared_job_cluster
+          spark_python_task:
+            python_file: ../src_databricks/batch_score.py
+            parameters:
+              - --catalog
+              - ${var.catalog}
+              - --model-alias
+              - Champion
+
+        - task_key: monitor
+          depends_on:
+            - task_key: batch_score
+          job_cluster_key: shared_job_cluster
+          spark_python_task:
+            python_file: ../src_databricks/monitor.py
+            parameters:
+              - --catalog
+              - ${var.catalog}
