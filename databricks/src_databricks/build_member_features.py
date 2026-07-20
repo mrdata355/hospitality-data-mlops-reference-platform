@@ -61,6 +61,12 @@ stays_12m = (
         F.sum(F.coalesce(F.col("s.net_room_revenue"), F.lit(0.0))).alias(
             "net_room_revenue_12m"
         ),
+        F.avg(
+            F.greatest(
+                F.datediff(F.col("s.check_in_date"), F.col("s.booking_date")),
+                F.lit(0),
+            )
+        ).alias("avg_booking_lead_days_12m"),
         F.max("s.booking_date").alias("last_booking_date"),
     )
 )
@@ -91,11 +97,17 @@ features = (
     .fillna(0)
     .withColumn(
         "points_utilization_rate",
-        F.when(F.col("points_earned_12m") > 0, F.col("points_redeemed_12m") / F.col("points_earned_12m")).otherwise(F.lit(0.0)),
+        F.when(
+            F.col("points_earned_12m") > 0,
+            F.col("points_redeemed_12m") / F.col("points_earned_12m"),
+        ).otherwise(F.lit(0.0)),
     )
     .withColumn(
         "expired_share",
-        F.when(F.col("points_earned_12m") > 0, F.col("points_expired_12m") / F.col("points_earned_12m")).otherwise(F.lit(0.0)),
+        F.when(
+            F.col("points_earned_12m") > 0,
+            F.col("points_expired_12m") / F.col("points_earned_12m"),
+        ).otherwise(F.lit(0.0)),
     )
     .withColumn(
         "days_since_last_booking",
