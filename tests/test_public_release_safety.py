@@ -16,8 +16,12 @@ def _repository_text() -> str:
 
 def test_no_company_specific_branding_remains():
     text = _repository_text().lower()
-    assert "hilton grand vacations" not in text
-    assert "hgv_data_platform" not in text
+    prohibited = [
+        "hilton " + "grand vacations",
+        "hgv_" + "data_platform",
+    ]
+    for value in prohibited:
+        assert value not in text, value
 
 
 def test_no_obvious_secret_material_is_committed():
