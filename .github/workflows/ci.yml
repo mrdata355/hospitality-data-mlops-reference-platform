@@ -59,6 +59,7 @@ jobs:
           test -f docs/SYSTEM_VALIDATION_WALKTHROUGH.md
           test -f docs/CAPABILITY_MATRIX.md
           test -f docs/SERVING_VALIDATION.md
+          test -f docs/ML_EVALUATION_LIMITATIONS.md
           test -f databricks/databricks.yml
           test -f databricks/resources/jobs.yml
           test -f databricks/resources/rollback.yml
@@ -88,9 +89,36 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+  quality-security:
+    name: lint-and-dependency-audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install engineering validation tools
+        run: pip install -r requirements-dev.txt
+      - name: Detect Python correctness defects
+        run: ruff check src tests scripts --select E9,F63,F7,F82 --output-format=github
+      - name: Audit Python dependencies
+        run: |
+          mkdir -p artifacts/security
+          pip-audit -r requirements.txt --format json --output artifacts/security/pip-audit.json
+      - name: Upload security evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-evidence
+          path: artifacts/security
+          if-no-files-found: warn
+          retention-days: 14
+
   serving-smoke:
     name: build-run-and-smoke-test-container
-    needs: validate
+    needs: [validate, quality-security]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
