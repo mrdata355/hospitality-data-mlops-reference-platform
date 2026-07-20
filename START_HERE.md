@@ -36,16 +36,16 @@ Install and verify:
 
 ```bash
 pip install -r requirements.txt
-python scripts/run_all.py
-pytest -q
+make validate
 ```
 
 Expected verification evidence:
 
-- 20 passing tests
-- member-risk ROC AUC at or above 0.75
-- forecast WAPE at or below 0.30
-- forecast WAPE no worse than the 52-week seasonal baseline
+- the complete automated test suite passes
+- member-risk ROC AUC remains at or above 0.75
+- forecast WAPE remains at or below 0.30
+- forecast WAPE remains no worse than the 52-week seasonal baseline
+- generated datasets, models, metrics, predictions, and monitoring outputs are recreated from source
 
 ## 3. Run the API
 
@@ -59,6 +59,7 @@ Open:
 - `http://localhost:8080/health`
 - `http://localhost:8080/ready`
 - `http://localhost:8080/model-info`
+- `http://localhost:8080/metrics`
 
 ## 4. Run with Docker
 
@@ -69,7 +70,19 @@ python scripts/run_all.py
 docker compose up --build
 ```
 
-## 5. Add credentials later
+## 5. Exercise the scoring service
+
+Install development dependencies, start the API, and launch the load test:
+
+```bash
+pip install -r requirements-dev.txt
+make api
+make loadtest
+```
+
+The load test exercises scoring, readiness, and liveness endpoints with representative generated feature payloads.
+
+## 6. Add credentials later
 
 Never commit passwords, access tokens, client secrets, private keys, `.env`, Databricks profiles, or cloud credential files.
 
@@ -79,7 +92,7 @@ Use `.env.example` only as a template. For GitHub Actions or cloud deployment, a
 
 See `docs/CREDENTIAL_SETUP.md` for the exact placeholders.
 
-## 6. Databricks path
+## 7. Databricks path
 
 Install the Databricks CLI, authenticate locally, then validate the development bundle:
 
@@ -92,7 +105,7 @@ databricks bundle run hospitality_data_platform_pipeline -t dev
 
 Do not run staging or production targets until workspace identities, catalog permissions, cluster policies, source volumes, and approvals are configured.
 
-## 7. How to explain the project
+## 8. How to explain the project
 
 Use this sequence in a technical walkthrough:
 
@@ -106,9 +119,10 @@ Use this sequence in a technical walkthrough:
 8. API/Kubernetes serving
 9. CI/CD, SLOs, security, incident response, and cost controls
 
-## 8. Important evidence files
+## 9. Important evidence files
 
 - `README.md`
+- `PROJECTS.md`
 - `docs/EXECUTIVE_OVERVIEW.md`
 - `docs/IMPLEMENTATION_EVIDENCE.md`
 - `docs/PRODUCTION_SYSTEM_DESIGN.md`
