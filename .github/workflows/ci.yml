@@ -5,18 +5,34 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: platform-ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
+    name: validate-data-models-and-code
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: pip
-      - run: pip install -r requirements.txt
+      - name: Install dependencies
+        run: pip install -r requirements.txt
       - name: Compile Python assets
-        run: python -m compileall -q src databricks/src_databricks sql/databricks/01_bronze_autoloader.py scripts/export_examples.py
+        run: >-
+          python -m compileall -q
+          src
+          databricks/src_databricks
+          sql/databricks/01_bronze_autoloader.py
+          scripts/export_examples.py
+          scripts/smoke_test_serving.py
       - name: Run deterministic pipeline
         run: python scripts/run_all.py
       - name: Rebuild reviewer sample pack
@@ -25,7 +41,7 @@ jobs:
           git diff --exit-code -- examples
       - name: Run automated tests
         run: pytest -q
-      - name: Model acceptance gates
+      - name: Enforce model acceptance gates
         run: |
           python - <<'PY'
           import json
@@ -40,6 +56,8 @@ jobs:
           test -f DISCLAIMER.md
           test -f docs/EXECUTIVE_OVERVIEW.md
           test -f docs/IMPLEMENTATION_EVIDENCE.md
+          test -f docs/SYSTEM_VALIDATION_WALKTHROUGH.md
+          test -f docs/CAPABILITY_MATRIX.md
           test -f databricks/databricks.yml
           test -f databricks/resources/jobs.yml
           test -f databricks/resources/rollback.yml
@@ -50,3 +68,93 @@ jobs:
           test -f docs/PRODUCTION_READINESS.md
           test -f examples/README.md
           test -f examples/sample_outputs/validation_summary.json
+      - name: Upload validated model artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: validated-member-risk-model
+          path: artifacts/models/member_churn_model.joblib
+          if-no-files-found: error
+          retention-days: 7
+      - name: Upload validation evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: validation-evidence
+          path: |
+            artifacts/metrics/*.json
+            artifacts/monitoring/*.json
+            examples/sample_outputs/validation_summary.json
+          if-no-files-found: error
+          retention-days: 14
+
+  serving-smoke:
+    name: build-run-and-smoke-test-container
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Download validated model artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: validated-member-risk-model
+          path: artifacts/models
+      - name: Validate Compose configuration
+        run: docker compose config --quiet
+      - name: Build immutable serving image
+        run: |
+          BUILD_DATE="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          docker build \
+            --build-arg SERVICE_VERSION=1.1.0 \
+            --build-arg VCS_REF="${GITHUB_SHA}" \
+            --build-arg BUILD_DATE="${BUILD_DATE}" \
+            --tag hospitality-data-platform-api:ci \
+            .
+      - name: Verify image security and metadata
+        run: |
+          test "$(docker image inspect --format '{{.Config.User}}' hospitality-data-platform-api:ci)" = "10001:10001"
+          docker image inspect --format '{{json .Config.Healthcheck}}' hospitality-data-platform-api:ci | grep -q '/ready'
+          docker image inspect --format '{{index .Config.Labels "org.opencontainers.image.revision"}}' hospitality-data-platform-api:ci | grep -q "${GITHUB_SHA}"
+      - name: Start production-style container
+        run: |
+          mkdir -p artifacts/serving
+          docker run --detach \
+            --name member-risk-api-ci \
+            --publish 8080:8080 \
+            --read-only \
+            --tmpfs /tmp:rw,noexec,nosuid,size=64m \
+            --cap-drop ALL \
+            --security-opt no-new-privileges \
+            --pids-limit 100 \
+            --env APP_ENV=ci \
+            --env MODEL_SOURCE=local \
+            --env MODEL_ALIAS=Champion \
+            --env SERVICE_VERSION=1.1.0 \
+            --env BUILD_SHA="${GITHUB_SHA}" \
+            hospitality-data-platform-api:ci
+      - name: Execute serving contract smoke test
+        run: >-
+          python scripts/smoke_test_serving.py
+          --base-url http://localhost:8080
+          --attempts 45
+          --delay-seconds 2
+          --evidence artifacts/serving/ci-smoke.json
+      - name: Capture container evidence
+        if: always()
+        run: |
+          mkdir -p artifacts/serving
+          docker inspect member-risk-api-ci > artifacts/serving/container-inspect.json 2>/dev/null || true
+          docker logs member-risk-api-ci > artifacts/serving/container.log 2>&1 || true
+      - name: Upload serving evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: serving-evidence
+          path: artifacts/serving
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Stop serving container
+        if: always()
+        run: docker rm --force member-risk-api-ci 2>/dev/null || true
