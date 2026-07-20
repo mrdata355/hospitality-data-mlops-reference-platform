@@ -7,6 +7,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+from hospitality_data_platform.config import ensure_runtime_directories
 from hospitality_data_platform.data_generation import generate_all
 from hospitality_data_platform.features import build_member_month_features, build_waterfall_features
 from hospitality_data_platform.models import train_churn_model, train_waterfall_model
@@ -15,6 +16,7 @@ from hospitality_data_platform.pipeline import run_pipeline
 
 
 def main() -> None:
+    ensure_runtime_directories()
     counts = generate_all()
     run_pipeline()
     member_features = build_member_month_features()
