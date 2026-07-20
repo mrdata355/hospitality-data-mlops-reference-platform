@@ -6,7 +6,7 @@
 **Core stack:** Python, SQL, Spark, PySpark, Databricks, Delta Lake, Unity Catalog design, MLflow, FastAPI, Docker, Kubernetes  
 **Release:** 1.1.0
 
-> **Independent reference implementation.** This repository uses deterministic generated data. It contains no real customer records, production credentials, proprietary source mappings, or confidential internal architecture. It is a production-style technical demonstration, not a claim of a live company production deployment.
+> **Independent reference implementation.** This repository uses deterministic generated data. It contains no real customer records, production credentials, proprietary source mappings, or confidential internal architecture. It does not represent an approved or deployed production system for any real company.
 
 ## What this platform demonstrates
 
