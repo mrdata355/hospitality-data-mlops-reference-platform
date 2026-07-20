@@ -22,6 +22,9 @@ MODEL_ALIAS = os.getenv("MODEL_ALIAS", "Champion")
 MODEL_URI = os.getenv(
     "MODEL_URI", "models:/hospitality_data_platform.models.member_churn_model@Champion"
 )
+APP_ENV = os.getenv("APP_ENV", "local")
+SERVICE_VERSION = os.getenv("SERVICE_VERSION", "1.1.0")
+BUILD_SHA = os.getenv("BUILD_SHA", "local-dev")
 _model: Any = None
 _model_loaded_at: str | None = None
 _request_count = 0
@@ -57,7 +60,7 @@ async def lifespan(_: FastAPI):
 app = FastAPI(
     title="Member Risk Scoring Service",
     description="Versioned member risk scoring API for the hospitality reference platform.",
-    version="1.1.0",
+    version=SERVICE_VERSION,
     lifespan=lifespan,
 )
 
@@ -134,13 +137,21 @@ async def request_context(request: Request, call_next):
         _error_count += 1
     response.headers["x-request-id"] = request_id
     response.headers["x-process-time-ms"] = f"{elapsed:.2f}"
+    response.headers["x-service-version"] = SERVICE_VERSION
+    response.headers["x-build-sha"] = BUILD_SHA
     response.headers["cache-control"] = "no-store"
     return response
 
 
 @app.get("/health")
 def health() -> dict[str, str]:
-    return {"status": "ok", "service": "member-risk-api"}
+    return {
+        "status": "ok",
+        "service": "member-risk-api",
+        "service_version": SERVICE_VERSION,
+        "build_sha": BUILD_SHA,
+        "environment": APP_ENV,
+    }
 
 
 @app.get("/ready")
@@ -148,7 +159,23 @@ def ready() -> dict[str, str]:
     if MODEL_SOURCE == "local" and not MODEL_PATH.exists():
         raise HTTPException(status_code=503, detail="Model artifact is unavailable.")
     get_model()
-    return {"status": "ready", "model_alias": MODEL_ALIAS}
+    return {
+        "status": "ready",
+        "model_alias": MODEL_ALIAS,
+        "model_source": MODEL_SOURCE,
+        "service_version": SERVICE_VERSION,
+    }
+
+
+@app.get("/version")
+def version() -> dict[str, str]:
+    return {
+        "service": "member-risk-api",
+        "service_version": SERVICE_VERSION,
+        "build_sha": BUILD_SHA,
+        "environment": APP_ENV,
+        "model_alias": MODEL_ALIAS,
+    }
 
 
 @app.get("/model-info")
@@ -160,6 +187,8 @@ def model_info() -> dict[str, str | list[str] | None]:
         "model_source": MODEL_SOURCE,
         "artifact": artifact,
         "loaded_at": _model_loaded_at,
+        "service_version": SERVICE_VERSION,
+        "build_sha": BUILD_SHA,
         "numeric_features": CHURN_NUMERIC,
         "categorical_features": CHURN_CATEGORICAL,
     }
@@ -175,6 +204,8 @@ def metrics() -> Response:
         f"model_api_errors_total {_error_count}\n"
         "# TYPE model_api_average_latency_ms gauge\n"
         f"model_api_average_latency_ms {average:.3f}\n"
+        "# TYPE model_api_build_info gauge\n"
+        f'model_api_build_info{{version="{SERVICE_VERSION}",build_sha="{BUILD_SHA}"}} 1\n'
     )
     return Response(content=body, media_type="text/plain; version=0.0.4")
 
