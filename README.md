@@ -31,6 +31,28 @@ This flagship repository contains six independently reviewable projects: lakehou
 | Databricks deployment definitions | Included and statically validated | isolated catalogs, runtime parameters, feature build, acceptance gate, alias promotion, scoring, monitoring |
 | Managed cloud deployment | Environment-dependent | requires approved authorized customer cloud resources and credentials |
 
+## Reviewer quick start
+
+A reviewer can validate the credential-free execution path with:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate              # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+make validate
+make api
+```
+
+Then inspect:
+
+```text
+http://localhost:8080/docs
+http://localhost:8080/health
+http://localhost:8080/ready
+http://localhost:8080/model-info
+http://localhost:8080/metrics
+```
+
 ## Repository validation model
 
 The source repository does not commit generated datasets or trained artifacts. GitHub Actions regenerates synthetic inputs, executes the full pipeline, trains and evaluates the models, runs automated tests, and enforces model acceptance thresholds on every pull request. This makes the published evidence reproducible from code rather than dependent on pre-generated outputs.
@@ -50,15 +72,15 @@ The source repository does not commit generated datasets or trained artifacts. G
 
 ```text
 src/hospitality_data_platform/        local pipeline, features, models, API, monitoring
-sql/databricks/               parameterized catalog, ingestion, MERGE, dimensional, Gold, feature, monitoring SQL
-databricks/                   Asset Bundle, environment variables, workflow and model promotion code
-components/                   component ownership and interface documentation
-docs/                         executive overview, architecture, contracts, SLOs, operations, security, ADRs
-data/                         generated validation inputs and Bronze/Silver/Gold outputs
-artifacts/                    models, metrics, predictions, monitoring, SQLite serving database
-tests/                        pipeline, grain, feature, model, API, and deployment-asset validation
-k8s/                          deployment, service, HPA, probes, and resource controls
-.github/workflows/            continuous integration gates
+sql/databricks/                       parameterized catalog, ingestion, MERGE, dimensional, Gold, feature, monitoring SQL
+databricks/                           Asset Bundle, environment variables, workflow and model promotion code
+components/                           component ownership and interface documentation
+docs/                                 executive overview, architecture, contracts, SLOs, operations, security, ADRs
+data/                                 generated validation inputs and Bronze/Silver/Gold outputs
+artifacts/                            models, metrics, predictions, monitoring, SQLite serving database
+tests/                                pipeline, grain, feature, model, API, and deployment-asset validation
+k8s/                                  deployment, service, HPA, probes, and resource controls
+.github/workflows/                    continuous integration gates
 ```
 
 ## Architecture
@@ -110,6 +132,7 @@ Endpoints:
 GET  /health
 GET  /ready
 GET  /model-info
+GET  /metrics
 POST /score/member-churn
 ```
 
