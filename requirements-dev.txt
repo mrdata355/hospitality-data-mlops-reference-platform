@@ -3,6 +3,6 @@
 
 # Engineering quality, security, and performance validation.
 locust>=2.31
-ruff>=0.6
+ruff>=0.15.22
 mypy>=1.11
 pip-audit>=2.7
