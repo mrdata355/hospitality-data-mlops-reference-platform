@@ -1,0 +1,49 @@
+{
+  "acceptance": {
+    "forecast_beats_seasonal_baseline": true,
+    "forecast_wape_at_most_0_30": true,
+    "member_risk_roc_auc_at_least_0_75": true
+  },
+  "data_profile": {
+    "source_domains": 12,
+    "source_row_counts": {
+      "campaigns": 12,
+      "labor_shifts": 40866,
+      "marketing_events": 6464,
+      "members": 1200,
+      "points_transactions": 12474,
+      "reservations": 28000,
+      "resort_stays": 24914,
+      "resorts": 8,
+      "sales_contracts": 1221,
+      "service_cases": 2763,
+      "tour_events": 2146,
+      "vacation_packages": 2600
+    },
+    "synthetic_data_only": true
+  },
+  "member_risk": {
+    "accuracy": 0.77,
+    "f1": 0.5964912280701754,
+    "precision": 0.5151515151515151,
+    "recall": 0.7083333333333334,
+    "roc_auc": 0.8105506822612086,
+    "test_rows": 300
+  },
+  "monitoring": {
+    "days_since_last_booking_psi": 0.04122668968035915,
+    "feature_drift_status": "PASS",
+    "forecast_accuracy_status": "PASS",
+    "forecast_bias": 1.2108397438341065,
+    "forecast_wape": 0.24913352387611165,
+    "high_risk_share": 0.19333333333333333
+  },
+  "waterfall_forecast": {
+    "baseline_wape": 0.26474926253687314,
+    "cutoff_week": "2026-03-16",
+    "forecast_bias": 1.2108397438341063,
+    "mae": 5.278516537125116,
+    "test_rows": 128,
+    "wape": 0.24913352387611165
+  }
+}
