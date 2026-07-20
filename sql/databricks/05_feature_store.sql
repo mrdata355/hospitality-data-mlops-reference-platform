@@ -26,6 +26,7 @@ stays_12m AS (
     COUNT(DISTINCT s.stay_id) AS stays_12m,
     SUM(s.room_nights) AS room_nights_12m,
     SUM(s.net_room_revenue) AS net_room_revenue_12m,
+    AVG(GREATEST(datediff(s.check_in_date, s.booking_date), 0)) AS avg_booking_lead_days_12m,
     MAX(s.booking_date) AS last_booking_date
   FROM base b
   LEFT JOIN silver.resort_stays s ON b.member_id = s.member_id
@@ -52,6 +53,7 @@ SELECT b.*,
   COALESCE(s.stays_12m,0) AS stays_12m,
   COALESCE(s.room_nights_12m,0) AS room_nights_12m,
   COALESCE(s.net_room_revenue_12m,0) AS net_room_revenue_12m,
+  COALESCE(s.avg_booking_lead_days_12m,0) AS avg_booking_lead_days_12m,
   COALESCE(c.service_cases_90d,0) AS service_cases_90d,
   COALESCE(c.escalated_cases_90d,0) AS escalated_cases_90d,
   COALESCE(c.avg_resolution_hours_90d,0) AS avg_resolution_hours_90d,
