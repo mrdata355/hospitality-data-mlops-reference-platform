@@ -21,8 +21,12 @@ def test_workflow_builds_features_before_training_and_promotion():
     workflow = yaml.safe_load((ROOT / "databricks/resources/jobs.yml").read_text())
     tasks = workflow["resources"]["jobs"]["hospitality_data_platform_pipeline"]["tasks"]
     by_key = {task["task_key"]: task for task in tasks}
-    assert {item["task_key"] for item in by_key["train_waterfall"]["depends_on"]} == {"build_waterfall_features"}
-    assert {item["task_key"] for item in by_key["batch_score"]["depends_on"]} == {"promote_waterfall"}
+    assert {item["task_key"] for item in by_key["train_waterfall"]["depends_on"]} == {
+        "build_waterfall_features"
+    }
+    assert {item["task_key"] for item in by_key["batch_score"]["depends_on"]} == {
+        "promote_waterfall"
+    }
 
 
 def test_kubernetes_has_scalability_and_resilience_controls():
@@ -36,9 +40,10 @@ def test_kubernetes_has_scalability_and_resilience_controls():
     assert (ROOT / "k8s/networkpolicy.yaml").exists()
 
 
-def test_model_governance_and_principal_docs_exist():
+def test_platform_governance_and_scalability_docs_exist():
     required = [
-        "docs/PRINCIPAL_ENGINEER_ALIGNMENT.md",
+        "docs/CAPABILITY_MATRIX.md",
+        "docs/SYSTEM_VALIDATION_WALKTHROUGH.md",
         "docs/SCALABILITY_STRATEGY.md",
         "docs/MODEL_GOVERNANCE.md",
         "docs/THREAT_MODEL.md",
