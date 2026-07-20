@@ -3,37 +3,92 @@
 [![Platform CI](https://github.com/mrdata355/hospitality-data-mlops-reference-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/mrdata355/hospitality-data-mlops-reference-platform/actions/workflows/ci.yml)
 
 **Designed and implemented by:** Kellon Lewis  
-**Runtime:** Python 3.10+, Databricks, Delta Lake, MLflow, FastAPI, Kubernetes  
-**Release:** 1.1.0  
-**Verification date:** July 10, 2026
+**Core stack:** Python, SQL, Spark, PySpark, Databricks, Delta Lake, Unity Catalog design, MLflow, FastAPI, Docker, Kubernetes  
+**Release:** 1.1.0
 
-> **Independent reference implementation.** This repository was independently developed by Kellon Lewis using generated, non-production validation data. It does not contain real customer records, credentials, proprietary source-system specifications, or confidential internal architecture, and it does not represent an approved or deployed production system for any real company. It is a production-style technical demonstration designed for hospitality and vacation-ownership use cases.
+> **Independent reference implementation.** This repository uses deterministic generated data. It contains no real customer records, production credentials, proprietary source mappings, or confidential internal architecture. It is a production-style technical demonstration, not a claim of a live company production deployment.
 
-## Executive purpose
+## What this platform demonstrates
 
-The platform demonstrates how resort, reservation, member, points, marketing, tour, contract, service, and labor data can be governed through one operating model from source landing to BI products, machine-learning features, registered models, batch scoring, API serving, monitoring, rollback, and incident response.
+One integrated hospitality platform connects governed lakehouse data, reusable point-in-time features, Waterfall-style demand forecasting, member-risk modeling, self-service analytical products, MLflow lifecycle controls, batch and API scoring, Kubernetes deployment definitions, monitoring, rollback, and incident response.
 
-The implementation is intended to show both hands-on engineering depth and architectural judgment. It includes a deterministic local execution path that can be verified without recurring cloud cost and a parameterized Databricks deployment path that requires approved workspace access, source connections, identities, and environment credentials.
+It is designed around the exact handoffs between **data engineering, feature engineering, data science, analytics, and MLOps**.
 
-## Six integrated projects
+### Review the showcase
 
-This flagship repository contains six independently reviewable projects: lakehouse foundation, tour and contract attribution, member points and risk, resort-week demand forecasting, resort labor efficiency, and a production MLOps control plane. See [`PROJECTS.md`](PROJECTS.md) for the scope and interview walkthrough of each project.
+- [Technical showcase](docs/TECHNICAL_SHOWCASE.md)
+- [Target-role evidence matrix](docs/JD_ALIGNMENT.md)
+- [10–15 minute interview demonstration](docs/INTERVIEW_DEMO.md)
+- [Six-project inventory](PROJECTS.md)
 
-## Verification status
+## Verified evidence
 
-| Capability | Status | Evidence |
+| Evidence | Result |
+|---|---:|
+| Deterministic pipeline | Working credential-free execution path |
+| Automated validation | Pipeline, grain, feature, model, API, and deployment tests |
+| Member-risk model | ROC AUC `0.811` |
+| Resort-week forecast | WAPE `0.249` |
+| Seasonal baseline | WAPE `0.265` |
+| Source domains | 12 generated operational domains |
+| Deployment definitions | Databricks, MLflow, Docker, Kubernetes, CI/CD |
+
+GitHub Actions regenerates the synthetic inputs, builds the data products, creates features, trains and evaluates the models, runs tests, and enforces acceptance gates. The repository does not depend on uploaded precomputed results.
+
+## Six integrated production projects
+
+| Project | Business outcome | Core engineering evidence |
 |---|---|---|
-| Deterministic local data pipeline | Verified | `python scripts/run_all.py` |
-| Unit, grain, feature, model, API, and production-asset tests | Verified | `pytest -q` |
-| Member-risk model | Verified | ROC AUC 0.811 |
-| Resort-week forecast | Verified | WAPE 0.249 vs. 0.265 seasonal baseline |
-| FastAPI scoring contract | Verified locally | health, readiness, model metadata, validation, score response |
-| Databricks deployment definitions | Included and statically validated | isolated catalogs, runtime parameters, feature build, acceptance gate, alias promotion, scoring, monitoring |
-| Managed cloud deployment | Environment-dependent | requires approved authorized customer cloud resources and credentials |
+| **1. Lakehouse Foundation** | Reliable governed data for ML and analytics | Bronze/Silver/Gold, contracts, quality, dimensions, facts, semantic metrics |
+| **2. Tour and Contract Attribution** | Correct package-to-tour-to-contract conversion reporting | controlled grain, funnel metrics, contract value, ROAS, duplicate prevention |
+| **3. Member Points and Risk** | Reusable member features and churn-risk scores | point-in-time features, batch scoring, FastAPI inference, ROC AUC validation |
+| **4. Resort-Week Forecasting** | Productionalized Waterfall-style demand forecast | lag features, chronological validation, baseline gates, MLflow promotion, rollback |
+| **5. Resort Labor Efficiency** | Staffing and operating-efficiency signals | resort-day model, cost per occupied unit, revenue per labor hour, anomaly flags |
+| **6. MLOps Control Plane** | Reliable model delivery and operations | CI/CD, registry, aliases, batch/API serving, Kubernetes, monitoring, SLOs, runbooks |
+
+## Architecture
+
+```mermaid
+flowchart LR
+    A[Generated or approved sources] --> B[Bronze ingestion and lineage]
+    B --> C[Silver quality and conformance]
+    C --> D[Dimensions and atomic facts]
+    D --> E[Gold analytical products]
+    D --> F[Point-in-time feature products]
+    F --> G[Member-risk training]
+    F --> H[Resort-week forecasting]
+    H --> I[Threshold and seasonal-baseline gates]
+    G --> J[Model artifacts and batch scores]
+    I --> K[MLflow registered candidate]
+    K --> L[Champion alias]
+    L --> M[Batch forecast scoring]
+    L --> N[FastAPI model serving]
+    E --> O[Semantic metrics and self-service analytics]
+    M --> P[Accuracy and drift monitoring]
+    N --> P
+    P --> Q[Rollback and incident response]
+```
+
+## Role-alignment snapshot
+
+| Requirement | Repository evidence |
+|---|---|
+| SQL, Python, Spark, PySpark | Modular local implementation plus parameterized Databricks Spark and SQL workloads |
+| Reusable ML features | Member-month and resort-week feature products with declared grains |
+| Batch and streaming | Deterministic batch path and Auto Loader streaming-ingestion reference |
+| Data modeling | Conformed dimensions, atomic facts, Gold marts, and semantic metrics |
+| Data quality | schema, null, uniqueness, FK, grain, missingness, drift, and model gates |
+| Feature lineage | source metadata, record hashes, entity keys, event-time cutoffs, and documented contracts |
+| Training/inference consistency | shared feature lists, point-in-time rules, API schema validation, and model signatures |
+| Feature Store and catalog | Unity Catalog feature schemas and reusable point-in-time tables |
+| Waterfall model | chronological validation, seasonal baseline, MLflow candidate, promotion, scoring, and rollback |
+| CI/CD and MLOps | GitHub Actions, model acceptance, versioning, deployment definitions, monitoring, and runbooks |
+| Kubernetes | non-root container, probes, HPA, PDB, topology spread, NetworkPolicy, and resources |
+| Azure readiness | Databricks targets, AKS patterns, workload-identity placeholder, and secret boundaries |
 
 ## Reviewer quick start
 
-A reviewer can validate the credential-free execution path with:
+The complete local path works without Azure, Databricks, MLflow, or Kubernetes credentials.
 
 ```bash
 python -m venv .venv
@@ -43,7 +98,7 @@ make validate
 make api
 ```
 
-Then inspect:
+Inspect:
 
 ```text
 http://localhost:8080/docs
@@ -53,131 +108,110 @@ http://localhost:8080/model-info
 http://localhost:8080/metrics
 ```
 
-## Repository validation model
+## End-to-end delivery path
 
-The source repository does not commit generated datasets or trained artifacts. GitHub Actions regenerates synthetic inputs, executes the full pipeline, trains and evaluates the models, runs automated tests, and enforces model acceptance thresholds on every pull request. This makes the published evidence reproducible from code rather than dependent on pre-generated outputs.
+1. Generate 12 deterministic source domains.
+2. Add Bronze source file, batch, ingestion-time, and record-hash metadata.
+3. Normalize and deduplicate Silver entities.
+4. Enforce schema, null, uniqueness, and foreign-key controls.
+5. Build conformed dimensions and atomic facts.
+6. Publish Gold resort, campaign, points, labor, and semantic products.
+7. Build leakage-safe member-month and resort-week features.
+8. Train and validate member-risk and forecasting models.
+9. Reject forecast candidates that fail the absolute WAPE or seasonal-baseline gates.
+10. Register and promote accepted model versions through a controlled alias.
+11. Publish batch predictions and expose optional synchronous scoring.
+12. Monitor drift, accuracy, bias, score distribution, API errors, and latency.
+13. Preserve the prior validated model and serving output for rollback.
 
-## Controlled delivery path
+## Feature engineering design
 
-1. Source-aligned Bronze ingestion with batch metadata, record hashes, checkpoints, and replay support.
-2. Silver conformance with schema enforcement, type normalization, deduplication, referential checks, and quarantine behavior.
-3. Conformed dimensions and atomic facts with declared grains.
-4. Gold marts for resort performance, campaign attribution, points utilization, and labor efficiency.
-5. Point-in-time feature products for member risk and resort-week forecasting.
-6. Chronological validation, seasonal-baseline comparison, absolute acceptance thresholds, immutable model versions, and controlled MLflow alias promotion.
-7. Batch scoring, optional REST serving, model/data monitoring, retained rollback targets, and operational runbooks.
-8. Dev, staging, and production isolation through Databricks Asset Bundle variables and environment-specific Unity Catalog catalogs.
+### Member-month feature product
+
+**Grain:** one row per member and as-of month.
+
+Signals include tenure, tier, points earned, redeemed and expired, utilization, stays, room nights, revenue, service cases, escalations, resolution duration, and booking recency.
+
+### Resort-week feature product
+
+**Grain:** one row per resort and forecast week.
+
+Signals include 1-, 4-, 13-, and 52-week lags, 4- and 13-week rolling means, seasonality, capacity, market, and campaign intensity known at scoring time.
+
+### Consistency controls
+
+- feature windows end before prediction cutoffs
+- labels are excluded from feature lists
+- model inputs use explicit names and types
+- API requests use a validated schema
+- managed deployment records model signatures and aliases
+- tests verify grain and missing lag behavior
+
+## Production MLOps controls
+
+- isolated development, staging, and production catalogs
+- Databricks Asset Bundle variables and workflow ordering
+- immutable registered model versions
+- objective acceptance gates before alias movement
+- retained previous version for rollback
+- batch-first inference for forecast and broad score refreshes
+- FastAPI liveness, readiness, model metadata, scoring, and metrics
+- non-root Docker runtime
+- Kubernetes rolling deployment, HPA, PDB, topology spreading, and NetworkPolicy
+- SLOs, incident severity, replay procedures, security guidance, and cost controls
 
 ## Repository map
 
 ```text
-src/hospitality_data_platform/        local pipeline, features, models, API, monitoring
-sql/databricks/                       parameterized catalog, ingestion, MERGE, dimensional, Gold, feature, monitoring SQL
-databricks/                           Asset Bundle, environment variables, workflow and model promotion code
-components/                           component ownership and interface documentation
-docs/                                 executive overview, architecture, contracts, SLOs, operations, security, ADRs
-data/                                 generated validation inputs and Bronze/Silver/Gold outputs
-artifacts/                            models, metrics, predictions, monitoring, SQLite serving database
-tests/                                pipeline, grain, feature, model, API, and deployment-asset validation
-k8s/                                  deployment, service, HPA, probes, and resource controls
-.github/workflows/                    continuous integration gates
+src/hospitality_data_platform/  local pipeline, features, models, API, monitoring
+sql/databricks/                 Spark SQL ingestion, MERGE, dimensions, Gold, features, monitoring
+databricks/                     Asset Bundle, workflows, training, promotion, scoring, rollback
+components/                     ownership and interface documentation for the six projects
+docs/                           showcase, JD evidence, architecture, contracts, SLOs, runbooks, ADRs
+tests/                          data, feature, model, API, and deployment-asset validation
+k8s/                            deployment, service, autoscaling, disruption and network controls
+loadtest/                       representative API load and response-contract validation
+.github/                        CI/CD and repository release controls
 ```
 
-## Architecture
-
-```mermaid
-flowchart LR
-    A[Generated or approved source inputs] --> B[Bronze landing]
-    B --> C[Silver conformance]
-    C --> D[Conformed dimensions and atomic facts]
-    D --> E[Gold analytical marts]
-    D --> F[Point-in-time feature products]
-    F --> G[Member risk model]
-    F --> H[Resort-week forecast]
-    H --> I[Baseline and threshold gates]
-    I --> J[MLflow candidate version]
-    J --> K[Controlled Champion alias]
-    G --> L[Batch scores and FastAPI]
-    K --> M[Batch forecast output]
-    L --> N[Monitoring and rollback]
-    M --> N
-    E --> O[BI and semantic metrics]
-```
-
-## Guided setup
-
-Start with [`START_HERE.md`](START_HERE.md), then use [`docs/CREDENTIAL_SETUP.md`](docs/CREDENTIAL_SETUP.md) when approved credentials are available.
-
-## Local verification
-
-The local path runs against generated fixtures and does not require a cloud account.
-
-```bash
-python -m venv .venv
-source .venv/bin/activate              # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-python scripts/run_all.py
-pytest -q
-```
-
-Start the scoring API:
-
-```bash
-make api
-```
-
-Endpoints:
-
-```text
-GET  /health
-GET  /ready
-GET  /model-info
-GET  /metrics
-POST /score/member-churn
-```
-
-The service defaults to the packaged local model. A managed deployment can set `MODEL_SOURCE=mlflow` and provide a registered `MODEL_URI` without changing the API contract.
-
-## Databricks deployment path
-
-The bundle defines isolated catalogs for `dev`, `staging`, and `prod`. Every Python workload receives the active catalog at runtime. The forecast workflow builds its own resort-week features, validates the candidate against both an absolute WAPE threshold and a seasonal baseline, records candidate evidence, moves the `Champion` alias only after acceptance, retains the previous alias version as the rollback target, scores the approved model, and writes monitoring results.
+## Managed Databricks path
 
 ```bash
 cd databricks
 databricks bundle validate -t dev
 databricks bundle deploy -t dev
 databricks bundle run hospitality_data_platform_pipeline -t dev
-
-databricks bundle validate -t staging
-databricks bundle deploy -t staging
-databricks bundle run hospitality_data_platform_pipeline -t staging
 ```
 
-Production promotion additionally requires an authorized release owner, workspace policies, managed identities, approved source volumes, and a change record.
+The managed path requires authorized infrastructure, source volumes, identities, Unity Catalog grants, network controls, secrets, and deployment approval.
 
 ## Data products and grains
 
 | Data product | Declared grain | Primary use |
 |---|---|---|
-| `gold.resort_monthly_performance` | resort + calendar month | executive resort performance |
-| `gold.campaign_tour_sales_attribution` | campaign + channel + market + month | package, tour, and contract attribution |
-| `gold.member_points_utilization` | member + calendar month | retention and points engagement |
+| `gold.resort_monthly_performance` | resort + month | resort performance |
+| `gold.campaign_tour_sales_attribution` | campaign + channel + market + month | marketing and contract conversion |
+| `gold.member_points_utilization` | member + month | retention and points engagement |
 | `gold.resort_labor_efficiency` | resort + business date | staffing and operating efficiency |
-| `features.member_month_features` | member + as-of month | member risk and upgrade models |
+| `features.member_month_features` | member + as-of month | member-risk and propensity models |
 | `features.waterfall_resort_week_features` | resort + forecast week | arrivals forecasting |
 | `gold.waterfall_forecast_resort_week` | resort + forecast week + run | planning and forecast monitoring |
 
-## Review documents
+## Documentation
 
+- [Technical showcase](docs/TECHNICAL_SHOWCASE.md)
+- [JD alignment](docs/JD_ALIGNMENT.md)
+- [Interview demonstration](docs/INTERVIEW_DEMO.md)
 - [Executive overview](docs/EXECUTIVE_OVERVIEW.md)
 - [Implementation evidence](docs/IMPLEMENTATION_EVIDENCE.md)
-- [System design guide](docs/PRODUCTION_SYSTEM_DESIGN.md)
+- [System design](docs/PRODUCTION_SYSTEM_DESIGN.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Data contracts](docs/DATA_CONTRACTS.md)
-- [Deployment and release management](docs/DEPLOYMENT.md)
-- [Service levels and monitoring](docs/SLO_SLA.md)
+- [Data dictionary](docs/DATA_DICTIONARY.md)
+- [Deployment](docs/DEPLOYMENT.md)
+- [SLOs and monitoring](docs/SLO_SLA.md)
 - [Operations runbook](docs/OPERATIONS_RUNBOOK.md)
 - [Incident response](docs/INCIDENT_RESPONSE.md)
 - [Security and governance](docs/SECURITY_GOVERNANCE.md)
-- [Cost controls](docs/COST_CONTROL.md)
-- [Production readiness checklist](docs/PRODUCTION_READINESS.md)
+- [Cost control](docs/COST_CONTROL.md)
+- [Production readiness](docs/PRODUCTION_READINESS.md)
