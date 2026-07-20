@@ -1,0 +1,35 @@
+bundle:
+  name: hospitality-data-mlops-reference-platform
+
+include:
+  - resources/*.yml
+
+variables:
+  catalog:
+    description: Unity Catalog catalog selected for the active environment.
+    default: hospitality_data_platform_dev
+  as_of_month:
+    description: Point-in-time cutoff used by the member feature job.
+    default: "2026-07-01"
+  max_forecast_wape:
+    description: Maximum validation WAPE accepted for model promotion.
+    default: "0.30"
+  spark_version:
+    default: "15.4.x-scala2.12"
+  node_type_id:
+    default: "Standard_DS3_v2"
+
+targets:
+  dev:
+    mode: development
+    default: true
+    variables:
+      catalog: hospitality_data_platform_dev
+  staging:
+    mode: production
+    variables:
+      catalog: hospitality_data_platform_staging
+  prod:
+    mode: production
+    variables:
+      catalog: hospitality_data_platform

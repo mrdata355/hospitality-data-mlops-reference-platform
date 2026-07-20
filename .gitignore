@@ -1,0 +1,46 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+coverage.xml
+.coverage
+htmlcov/
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+.databrickscfg
+kubeconfig*
+
+# Databricks / MLflow
+.databricks/
+mlruns/
+
+# Generated data and artifacts
+data/raw/
+data/bronze/
+data/silver/
+data/gold/
+artifacts/models/
+artifacts/metrics/
+artifacts/predictions/
+artifacts/monitoring/
+artifacts/figures/
+artifacts/*.sqlite
+artifacts/*.json
+artifacts/*.txt
+
+# OS and editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

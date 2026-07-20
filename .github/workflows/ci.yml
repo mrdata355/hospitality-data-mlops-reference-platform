@@ -1,0 +1,46 @@
+name: platform-ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Compile Python assets
+        run: python -m compileall -q src databricks/src_databricks sql/databricks/01_bronze_autoloader.py
+      - name: Run deterministic pipeline
+        run: python scripts/run_all.py
+      - name: Run automated tests
+        run: pytest -q
+      - name: Model acceptance gates
+        run: |
+          python - <<'PY'
+          import json
+          churn = json.load(open('artifacts/metrics/member_churn_metrics.json'))
+          forecast = json.load(open('artifacts/metrics/waterfall_forecast_metrics.json'))
+          assert churn['roc_auc'] >= 0.75, churn
+          assert forecast['wape'] <= 0.30, forecast
+          assert forecast['wape'] <= forecast['baseline_wape'], forecast
+          PY
+      - name: Verify release assets
+        run: |
+          test -f DISCLAIMER.md
+          test -f docs/EXECUTIVE_OVERVIEW.md
+          test -f docs/IMPLEMENTATION_EVIDENCE.md
+          test -f databricks/databricks.yml
+          test -f databricks/resources/jobs.yml
+          test -f databricks/resources/rollback.yml
+          test -f databricks/src_databricks/promote_waterfall.py
+          test -f databricks/src_databricks/rollback_waterfall.py
+          test -f k8s/deployment.yaml
+          test -f docs/OPERATIONS_RUNBOOK.md
+          test -f docs/PRODUCTION_READINESS.md
