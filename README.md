@@ -14,8 +14,9 @@ One integrated hospitality platform connects governed lakehouse data, reusable p
 
 It is designed around the exact handoffs between **data engineering, feature engineering, data science, analytics, and MLOps**.
 
-### Review the showcase
+### Review the evidence
 
+- [Reviewer sample data and outputs](examples/README.md)
 - [Technical showcase](docs/TECHNICAL_SHOWCASE.md)
 - [Target-role evidence matrix](docs/JD_ALIGNMENT.md)
 - [10–15 minute interview demonstration](docs/INTERVIEW_DEMO.md)
@@ -26,14 +27,41 @@ It is designed around the exact handoffs between **data engineering, feature eng
 | Evidence | Result |
 |---|---:|
 | Deterministic pipeline | Working credential-free execution path |
-| Automated validation | Pipeline, grain, feature, model, API, and deployment tests |
+| Automated validation | Pipeline, grain, feature, model, API, sample-pack, and deployment tests |
 | Member-risk model | ROC AUC `0.811` |
 | Resort-week forecast | WAPE `0.249` |
 | Seasonal baseline | WAPE `0.265` |
 | Source domains | 12 generated operational domains |
+| Visible reviewer samples | 5 source datasets, 3 output datasets, and a validation summary |
 | Deployment definitions | Databricks, MLflow, Docker, Kubernetes, CI/CD |
 
-GitHub Actions regenerates the synthetic inputs, builds the data products, creates features, trains and evaluates the models, runs tests, and enforces acceptance gates. The repository does not depend on uploaded precomputed results.
+GitHub Actions regenerates the synthetic inputs, builds the data products, creates features, trains and evaluates the models, exports the reviewer sample pack, runs tests, and enforces acceptance gates. The repository does not depend on uploaded production data or hidden precomputed results.
+
+## Inspect the mock datasets immediately
+
+The committed [`examples/`](examples/README.md) directory lets reviewers inspect generated data and outputs without running the platform first.
+
+### Source samples
+
+- members without names, emails, or phone numbers
+- reservations with resort, dates, status, room nights, points, and revenue
+- points transactions with earning, redemption, expiration, and adjustment activity
+- tour events with package, prospect, status, market, and date
+- labor shifts with resort-day hours and generated payroll cost
+
+### Output samples
+
+- reusable member-month point-in-time features
+- resort-week Waterfall forecast predictions and errors
+- data-quality results
+- model metrics, source volumes, drift status, and acceptance gates
+
+The samples are deterministic and synchronized with the pipeline by CI:
+
+```bash
+python scripts/run_all.py
+python scripts/export_examples.py
+```
 
 ## Six integrated production projects
 
@@ -82,7 +110,7 @@ flowchart LR
 | Training/inference consistency | shared feature lists, point-in-time rules, API schema validation, and model signatures |
 | Feature Store and catalog | Unity Catalog feature schemas and reusable point-in-time tables |
 | Waterfall model | chronological validation, seasonal baseline, MLflow candidate, promotion, scoring, and rollback |
-| CI/CD and MLOps | GitHub Actions, model acceptance, versioning, deployment definitions, monitoring, and runbooks |
+| CI/CD and MLOps | GitHub Actions, model acceptance, versioning, sample synchronization, monitoring, and runbooks |
 | Kubernetes | non-root container, probes, HPA, PDB, topology spread, NetworkPolicy, and resources |
 | Azure readiness | Databricks targets, AKS patterns, workload-identity placeholder, and secret boundaries |
 
@@ -97,6 +125,8 @@ pip install -r requirements.txt
 make validate
 make api
 ```
+
+`make validate` generates all 12 source domains, builds the pipeline, exports the sample pack, trains both models, and runs the complete test suite.
 
 Inspect:
 
@@ -145,7 +175,7 @@ Signals include 1-, 4-, 13-, and 52-week lags, 4- and 13-week rolling means, sea
 - model inputs use explicit names and types
 - API requests use a validated schema
 - managed deployment records model signatures and aliases
-- tests verify grain and missing lag behavior
+- tests verify grain, sample safety, and missing lag behavior
 
 ## Production MLOps controls
 
@@ -163,12 +193,13 @@ Signals include 1-, 4-, 13-, and 52-week lags, 4- and 13-week rolling means, sea
 ## Repository map
 
 ```text
+examples/                       compact generated inputs, outputs, metrics, and quality evidence
 src/hospitality_data_platform/  local pipeline, features, models, API, monitoring
 sql/databricks/                 Spark SQL ingestion, MERGE, dimensions, Gold, features, monitoring
 databricks/                     Asset Bundle, workflows, training, promotion, scoring, rollback
 components/                     ownership and interface documentation for the six projects
 docs/                           showcase, JD evidence, architecture, contracts, SLOs, runbooks, ADRs
-tests/                          data, feature, model, API, and deployment-asset validation
+tests/                          data, feature, model, API, examples, and deployment-asset validation
 k8s/                            deployment, service, autoscaling, disruption and network controls
 loadtest/                       representative API load and response-contract validation
 .github/                        CI/CD and repository release controls
@@ -199,6 +230,7 @@ The managed path requires authorized infrastructure, source volumes, identities,
 
 ## Documentation
 
+- [Reviewer sample data and outputs](examples/README.md)
 - [Technical showcase](docs/TECHNICAL_SHOWCASE.md)
 - [JD alignment](docs/JD_ALIGNMENT.md)
 - [Interview demonstration](docs/INTERVIEW_DEMO.md)
