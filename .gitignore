@@ -1,4 +1,4 @@
-# Python
+# Python environments and caches
 .venv/
 venv/
 __pycache__/
@@ -9,6 +9,9 @@ __pycache__/
 coverage.xml
 .coverage
 htmlcov/
+build/
+dist/
+*.egg-info/
 
 # Secrets and local configuration
 .env
@@ -25,7 +28,7 @@ kubeconfig*
 .databricks/
 mlruns/
 
-# Generated data and artifacts
+# Generated data, models, metrics, and local serving artifacts
 data/raw/
 data/bronze/
 data/silver/
@@ -38,6 +41,10 @@ artifacts/figures/
 artifacts/*.sqlite
 artifacts/*.json
 artifacts/*.txt
+
+# Runtime and load-test output
+*.log
+loadtest/results/
 
 # OS and editors
 .DS_Store
