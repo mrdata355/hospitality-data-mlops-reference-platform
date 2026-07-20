@@ -8,27 +8,50 @@ client = TestClient(app)
 def test_health():
     response = client.get("/health")
     assert response.status_code == 200
-    assert response.json()["status"] == "ok"
+    body = response.json()
+    assert body["status"] == "ok"
+    assert body["service"] == "member-risk-api"
+    assert body["service_version"]
+    assert body["build_sha"]
     assert response.headers["x-request-id"]
+    assert response.headers["x-service-version"]
+    assert response.headers["x-build-sha"]
 
 
 def test_ready():
     response = client.get("/ready")
     assert response.status_code == 200
-    assert response.json()["status"] == "ready"
+    body = response.json()
+    assert body["status"] == "ready"
+    assert body["model_alias"] == "Champion"
+    assert body["model_source"] in {"local", "mlflow"}
+
+
+def test_version():
+    response = client.get("/version")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["service"] == "member-risk-api"
+    assert body["service_version"]
+    assert body["build_sha"]
+    assert body["environment"]
 
 
 def test_model_info():
     response = client.get("/model-info")
     assert response.status_code == 200
-    assert response.json()["model_alias"] == "Champion"
-    assert "avg_booking_lead_days_12m" in response.json()["numeric_features"]
+    body = response.json()
+    assert body["model_alias"] == "Champion"
+    assert body["service_version"]
+    assert body["build_sha"]
+    assert "avg_booking_lead_days_12m" in body["numeric_features"]
 
 
 def test_metrics_endpoint():
     response = client.get("/metrics")
     assert response.status_code == 200
     assert "model_api_requests_total" in response.text
+    assert "model_api_build_info" in response.text
 
 
 def test_score():
