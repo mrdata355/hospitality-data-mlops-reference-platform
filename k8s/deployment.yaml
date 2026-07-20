@@ -26,11 +26,16 @@ spec:
         app: member-risk-api
         app.kubernetes.io/name: member-risk-api
         app.kubernetes.io/component: model-serving
+        app.kubernetes.io/version: "1.1.0"
+        azure.workload.identity/use: "true"
     spec:
       serviceAccountName: member-risk-api
       terminationGracePeriodSeconds: 30
       securityContext:
         runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
         seccompProfile:
           type: RuntimeDefault
       topologySpreadConstraints:
@@ -48,7 +53,7 @@ spec:
               app: member-risk-api
       containers:
         - name: api
-          image: your-registry/hospitality-data-platform-api:1.1.0
+          image: ghcr.io/mrdata355/hospitality-data-mlops-reference-platform:1.1.0
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
@@ -107,4 +112,5 @@ spec:
                 command: ["/bin/sh", "-c", "sleep 10"]
       volumes:
         - name: tmp
-          emptyDir: {}
+          emptyDir:
+            sizeLimit: 64Mi
