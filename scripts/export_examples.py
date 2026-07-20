@@ -96,6 +96,7 @@ def export_examples() -> None:
             "stays_12m",
             "room_nights_12m",
             "net_room_revenue_12m",
+            "avg_booking_lead_days_12m",
             "service_cases_90d",
             "escalated_cases_90d",
             "avg_resolution_hours_90d",
