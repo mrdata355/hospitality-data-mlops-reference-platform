@@ -23,11 +23,11 @@
     "synthetic_data_only": true
   },
   "member_risk": {
-    "accuracy": 0.77,
-    "f1": 0.5964912280701754,
-    "precision": 0.5151515151515151,
-    "recall": 0.7083333333333334,
-    "roc_auc": 0.8105506822612086,
+    "accuracy": 0.7666666666666667,
+    "f1": 0.5882352941176471,
+    "precision": 0.5102040816326531,
+    "recall": 0.6944444444444444,
+    "roc_auc": 0.8103070175438597,
     "test_rows": 300
   },
   "monitoring": {
@@ -36,7 +36,7 @@
     "forecast_accuracy_status": "PASS",
     "forecast_bias": 1.2108397438341065,
     "forecast_wape": 0.24913352387611165,
-    "high_risk_share": 0.19333333333333333
+    "high_risk_share": 0.19666666666666666
   },
   "waterfall_forecast": {
     "baseline_wape": 0.26474926253687314,
