@@ -16,9 +16,13 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt
       - name: Compile Python assets
-        run: python -m compileall -q src databricks/src_databricks sql/databricks/01_bronze_autoloader.py
+        run: python -m compileall -q src databricks/src_databricks sql/databricks/01_bronze_autoloader.py scripts/export_examples.py
       - name: Run deterministic pipeline
         run: python scripts/run_all.py
+      - name: Rebuild reviewer sample pack
+        run: |
+          python scripts/export_examples.py
+          git diff --exit-code -- examples
       - name: Run automated tests
         run: pytest -q
       - name: Model acceptance gates
@@ -44,3 +48,5 @@ jobs:
           test -f k8s/deployment.yaml
           test -f docs/OPERATIONS_RUNBOOK.md
           test -f docs/PRODUCTION_READINESS.md
+          test -f examples/README.md
+          test -f examples/sample_outputs/validation_summary.json
