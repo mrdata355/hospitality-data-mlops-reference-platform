@@ -72,6 +72,7 @@ class MemberFeatures(BaseModel):
     stays_12m: float = Field(ge=0)
     room_nights_12m: float = Field(ge=0)
     net_room_revenue_12m: float = Field(ge=0)
+    avg_booking_lead_days_12m: float = Field(ge=0)
     service_cases_90d: float = Field(ge=0)
     escalated_cases_90d: float = Field(ge=0)
     avg_resolution_hours_90d: float = Field(ge=0)
