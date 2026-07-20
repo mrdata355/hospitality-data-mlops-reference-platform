@@ -34,6 +34,7 @@ def test_kubernetes_has_scalability_security_and_release_controls():
     hpa = yaml.safe_load((ROOT / "k8s/hpa.yaml").read_text())
     pod_spec = deployment["spec"]["template"]["spec"]
     container = pod_spec["containers"][0]
+    environment = {item["name"]: item.get("value") for item in container["env"]}
 
     assert deployment["spec"]["replicas"] >= 3
     assert deployment["spec"]["strategy"]["rollingUpdate"]["maxUnavailable"] == 0
@@ -42,7 +43,10 @@ def test_kubernetes_has_scalability_security_and_release_controls():
     assert container["securityContext"]["readOnlyRootFilesystem"] is True
     assert container["securityContext"]["capabilities"]["drop"] == ["ALL"]
     assert container["image"].startswith("ghcr.io/mrdata355/")
+    assert container["image"].endswith(":1.1.0")
     assert "your-registry" not in container["image"]
+    assert environment["MODEL_SOURCE"] == "local"
+    assert "MODEL_URI" not in environment
     assert hpa["spec"]["maxReplicas"] >= 10
     assert (ROOT / "k8s/pdb.yaml").exists()
     assert (ROOT / "k8s/networkpolicy.yaml").exists()
@@ -50,13 +54,17 @@ def test_kubernetes_has_scalability_security_and_release_controls():
     assert (ROOT / "k8s/kustomization.yaml").exists()
 
 
-def test_ci_requires_a_running_container_smoke_test():
+def test_ci_requires_running_container_and_security_gates():
     workflow = (ROOT / ".github/workflows/ci.yml").read_text()
+    assert "quality-security:" in workflow
+    assert "ruff check" in workflow
+    assert "pip-audit -r requirements.txt" in workflow
     assert "serving-smoke:" in workflow
     assert "scripts/smoke_test_serving.py" in workflow
     assert "--read-only" in workflow
     assert "--cap-drop ALL" in workflow
     assert "validated-member-risk-model" in workflow
+    assert "needs: [validate, quality-security]" in workflow
 
 
 def test_versioned_image_release_workflow_exists():
@@ -64,8 +72,24 @@ def test_versioned_image_release_workflow_exists():
     assert "ghcr.io/${{ github.repository }}" in release_workflow
     assert "packages: write" in release_workflow
     assert "linux/amd64,linux/arm64" in release_workflow
+    assert "type=semver,pattern={{version}}" in release_workflow
     assert "provenance: mode=max" in release_workflow
     assert "sbom: true" in release_workflow
+
+
+def test_static_analysis_and_pinned_dependencies_exist():
+    codeql = (ROOT / ".github/workflows/codeql.yml").read_text()
+    requirements = (ROOT / "requirements.txt").read_text().splitlines()
+    dependency_lines = [
+        line.strip()
+        for line in requirements
+        if line.strip() and not line.lstrip().startswith("#")
+    ]
+
+    assert "github/codeql-action/init@v3" in codeql
+    assert "github/codeql-action/analyze@v3" in codeql
+    assert dependency_lines
+    assert all("==" in line for line in dependency_lines)
 
 
 def test_platform_governance_and_scalability_docs_exist():
@@ -74,6 +98,7 @@ def test_platform_governance_and_scalability_docs_exist():
         "docs/SYSTEM_VALIDATION_WALKTHROUGH.md",
         "docs/SCALABILITY_STRATEGY.md",
         "docs/MODEL_GOVERNANCE.md",
+        "docs/ML_EVALUATION_LIMITATIONS.md",
         "docs/THREAT_MODEL.md",
         "docs/CAPACITY_AND_LOAD_PLAN.md",
         "docs/SERVING_VALIDATION.md",
