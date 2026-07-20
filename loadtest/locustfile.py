@@ -15,6 +15,7 @@ PAYLOAD = {
     "stays_12m": 1,
     "room_nights_12m": 4,
     "net_room_revenue_12m": 1250,
+    "avg_booking_lead_days_12m": 42,
     "service_cases_90d": 2,
     "escalated_cases_90d": 1,
     "avg_resolution_hours_90d": 52,
