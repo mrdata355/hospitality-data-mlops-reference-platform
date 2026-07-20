@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import http.client
 import json
 import time
 import urllib.error
@@ -28,6 +29,15 @@ SCORE_PAYLOAD = {
     "member_tier": "Member",
     "home_market": "Orlando",
 }
+
+TRANSIENT_STARTUP_ERRORS = (
+    urllib.error.URLError,
+    http.client.HTTPException,
+    ConnectionError,
+    OSError,
+    TimeoutError,
+    json.JSONDecodeError,
+)
 
 
 def request_json(
@@ -68,9 +78,10 @@ def wait_until_ready(base_url: str, attempts: int, delay_seconds: float) -> dict
                     "response": body,
                 }
             last_error = f"unexpected readiness response: status={status}, body={body}"
-        except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
-            last_error = str(exc)
-        time.sleep(delay_seconds)
+        except TRANSIENT_STARTUP_ERRORS as exc:
+            last_error = f"{type(exc).__name__}: {exc}"
+        if attempt < attempts:
+            time.sleep(delay_seconds)
     raise RuntimeError(f"service did not become ready after {attempts} attempts: {last_error}")
 
 
@@ -84,10 +95,17 @@ def run_smoke_test(base_url: str, attempts: int, delay_seconds: float) -> dict[s
 
     evidence["checks"]["readiness"] = wait_until_ready(base_url, attempts, delay_seconds)
 
-    health_status, health, _, health_latency = request_json(f"{base_url}/health")
+    health_status, health, health_headers, health_latency = request_json(f"{base_url}/health")
     assert health_status == 200, health
     assert health.get("status") == "ok", health
     assert health.get("service") == "member-risk-api", health
+    assert health.get("service_version"), health
+    assert health.get("build_sha"), health
+    assert health_headers.get("x-service-version") == health.get("service_version"), (
+        health_headers,
+        health,
+    )
+    assert health_headers.get("x-build-sha") == health.get("build_sha"), (health_headers, health)
     evidence["checks"]["health"] = {
         "status": health_status,
         "latency_ms": round(health_latency, 3),
@@ -134,6 +152,7 @@ def run_smoke_test(base_url: str, attempts: int, delay_seconds: float) -> dict[s
         "model_api_requests_total",
         "model_api_errors_total",
         "model_api_average_latency_ms",
+        "model_api_build_info",
     ):
         assert metric_name in metrics, metrics
     evidence["checks"]["metrics"] = {
