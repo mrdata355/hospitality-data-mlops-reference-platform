@@ -40,6 +40,13 @@ def test_feature_and_forecast_grains_are_unique() -> None:
     assert not forecasts.duplicated(["resort_id", "forecast_week_start", "forecast_run_id"]).any()
 
 
+def test_feature_sample_contains_booking_lead_time() -> None:
+    features = pd.read_csv(EXAMPLES / "sample_outputs/member_month_features_sample.csv")
+    assert "avg_booking_lead_days_12m" in features.columns
+    assert features["avg_booking_lead_days_12m"].notna().all()
+    assert (features["avg_booking_lead_days_12m"] >= 0).all()
+
+
 def test_sample_quality_results_pass() -> None:
     quality = pd.read_csv(EXAMPLES / "sample_outputs/data_quality_results.csv")
     assert set(quality["status"]) == {"PASS"}
