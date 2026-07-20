@@ -1,0 +1,23 @@
+{
+  "benchmark_id": "hospitality-10tb-NOT_EXECUTED",
+  "status": "PLANNED_NOT_EXECUTED",
+  "profile": "10tb",
+  "source_commit": "REPLACE_WITH_EXECUTED_COMMIT",
+  "started_at_utc": null,
+  "completed_at_utc": null,
+  "runtime_seconds": null,
+  "target_logical_bytes": 10995116277760,
+  "actual_storage_bytes": null,
+  "expected_rows": null,
+  "actual_rows": null,
+  "full_reconciliation": false,
+  "output_format": "delta",
+  "output_root": "REDACTED_APPROVED_REMOTE_LOCATION",
+  "credentials_committed": false,
+  "domains": [],
+  "limitations": [
+    "Template only; this is not execution evidence.",
+    "Generated records are synthetic and do not represent customer behavior.",
+    "Actual cost and performance depend on the selected cloud runtime and cluster."
+  ]
+}
