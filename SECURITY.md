@@ -10,13 +10,30 @@ This repository is an independent reference implementation using generated data.
 - internal proprietary architecture or source-system specifications
 - `.env`, Databricks profiles, kubeconfigs, or cloud credential files
 
-## Preventive controls
+## Enforced repository controls
 
-- Keep generated datasets and trained artifacts outside Git history.
-- Use GitHub secret scanning, dependency review, and automated dependency updates.
-- Prefer managed identity or workload identity over long-lived client secrets.
-- Use separate development, staging, and production identities and catalogs.
-- Rotate any credential immediately if it appears in a commit, build log, artifact, or issue.
+Pull-request automation performs:
+
+- deterministic data and model regeneration
+- Python compilation and correctness checks
+- automated tests and model acceptance gates
+- dependency vulnerability audit
+- CodeQL static analysis
+- non-root, read-only container execution
+- health, readiness, version, model metadata, scoring, and metrics smoke tests
+- release metadata, provenance, and SBOM generation for versioned images
+
+Dependabot is configured for Python and GitHub Actions dependencies.
+
+## Required managed-environment controls
+
+A live deployment must additionally provide authorized identities, secret stores, registry policy, network policy enforcement, gateway authentication and rate limits, monitoring destinations, immutable image-digest promotion, vulnerability scanning, and change approval.
+
+The public manifests and documentation describe those boundaries but do not claim that external controls are active in a live environment.
+
+## Credential response
+
+Rotate any credential immediately if it appears in a commit, build log, artifact, issue, or pull request. Remove access before rewriting history, then document the incident through the authorized private reporting channel.
 
 ## Reporting a concern
 
