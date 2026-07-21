@@ -1,6 +1,6 @@
 # System Validation
 
-This document defines the repeatable validation path for the generated-data platform.
+This document defines the repeatable validation path for the generated-data platform. All validation uses generated non-production data only.
 
 ## Local validation
 
