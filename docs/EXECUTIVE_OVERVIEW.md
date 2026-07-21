@@ -29,6 +29,7 @@ It also validates the running container rather than treating successful unit tes
 | Serving release gate | Build, restricted run, readiness, score, metrics, benchmark |
 | Forecast robustness | Expanding-window rolling-origin backtest artifact |
 | Software assurance | Ruff, branch coverage, dependency audit, CodeQL |
+| Executive demonstration | One command produces data, model, temporal, API, and metrics evidence |
 
 The model measurements are deterministic system-validation evidence produced from generated data. They are not claims of customer impact or real-world predictive lift.
 
@@ -43,19 +44,31 @@ The model measurements are deterministic system-validation evidence produced fro
 - The local path remains reproducible without recurring cloud spend or embedded credentials.
 - Exact direct dependency versions, dependency auditing, static analysis, coverage, and automated update proposals reduce software-supply-chain drift.
 
+## Demonstration path
+
+Run the secured local demonstration with:
+
+```bash
+make executive-demo
+```
+
+The command regenerates the platform, executes rolling-origin validation, starts the restricted container, validates the live API contract, prints an executive summary, retains machine-readable evidence, and stops the container. See `docs/EXECUTIVE_DEMO.md` for the two-minute narration and the authorized Azure Container Apps path.
+
 ## Material boundaries
 
 The local data, model, API, Docker, testing, benchmarking, and CI paths are executable without cloud credentials. The Azure, Databricks, Unity Catalog, MLflow Registry, and Kubernetes assets are implementation-ready definitions, not evidence of an active deployment inside a real company.
+
+The manual Azure workflow can create sanitized deployment evidence after an authorized OpenID Connect identity and dedicated Azure resources are configured. Until that workflow completes successfully, no live Azure deployment is claimed.
 
 A production authorization would still require approved identities, networking, source contracts, secrets, registry access, production-like volume tests, monitoring destinations, data-owner acceptance, and operational sign-off.
 
 ## Recommended review sequence
 
-1. Review `README.md` for platform scope and architecture.
-2. Review `docs/MODEL_CARD.md` for intended use, evaluation, limitations, and controls.
-3. Review `.github/workflows/ci.yml` for model-to-container artifact handoff and live serving validation.
-4. Review `.github/workflows/quality.yml` and `.github/workflows/codeql.yml` for software assurance.
-5. Review `scripts/run_backtests.py` and `src/hospitality_data_platform/backtesting.py` for temporal validation.
-6. Review `databricks/resources/jobs.yml` for managed workflow ordering and model promotion.
-7. Review `k8s/` and `docs/PERFORMANCE_VALIDATION.md` for serving availability and performance evidence.
-8. Run `make validate`, `make quality`, and the secured container smoke path.
+1. Run `make executive-demo` and inspect `artifacts/demo/executive_demo.json`.
+2. Review `README.md` for platform scope and architecture.
+3. Review `docs/MODEL_CARD.md` for intended use, evaluation, limitations, and controls.
+4. Review `.github/workflows/ci.yml` for model-to-container artifact handoff and live serving validation.
+5. Review `.github/workflows/quality.yml` and `.github/workflows/codeql.yml` for software assurance.
+6. Review `scripts/run_backtests.py` and `src/hospitality_data_platform/backtesting.py` for temporal validation.
+7. Review `databricks/resources/jobs.yml` for managed workflow ordering and model promotion.
+8. Review `k8s/`, `docs/PERFORMANCE_VALIDATION.md`, and `docs/EXECUTIVE_DEMO.md` for deployment and serving evidence.

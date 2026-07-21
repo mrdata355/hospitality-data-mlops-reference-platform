@@ -1,6 +1,6 @@
 # GitHub Automation and Release Controls
 
-This directory defines the repository controls used to validate changes, retain evidence, manage dependencies, and publish versioned container images.
+This directory defines the repository controls used to validate changes, retain evidence, manage dependencies, publish versioned container images, and execute an authorized sanitized demonstration.
 
 ## Workflows
 
@@ -10,8 +10,9 @@ This directory defines the repository controls used to validate changes, retain 
 | `workflows/quality.yml` | pull requests and `main` updates | changed-file Ruff checks, branch coverage, rolling-origin forecast backtesting, evidence-contract validation, and Python dependency auditing |
 | `workflows/codeql.yml` | pull requests, `main`, weekly schedule | Python CodeQL analysis with the `security-extended` query suite |
 | `workflows/release-image.yml` | approved release tags | multi-architecture GHCR image publication with provenance and SBOM output |
+| `workflows/deploy-azure-demo.yml` | manual dispatch in the `azure-demo` environment | OIDC authentication, deterministic artifact generation, ACR build, Azure Container Apps deployment, live API validation, and sanitized evidence retention |
 
-The workflows are intentionally separated so pipeline correctness, software quality, dependency security, static analysis, serving behavior, and release publication remain independently visible.
+The validation workflows are separated so pipeline correctness, software quality, dependency security, static analysis, serving behavior, and release publication remain independently visible. The Azure workflow is manual because a repository merge does not authorize cloud resource creation.
 
 ## Dependency maintenance
 
