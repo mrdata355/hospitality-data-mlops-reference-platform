@@ -2,7 +2,7 @@
 -r requirements.txt
 
 # Exact engineering-quality, security, and performance tooling.
-coverage==7.13.3
+coverage==7.15.2
 locust==2.46.0
 mypy==2.3.0
 pip-audit==2.10.1
