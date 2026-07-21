@@ -1,12 +1,12 @@
-# Reviewer Sample Data and Outputs
+# Generated Sample Data and Outputs
 
-This directory provides a compact, public-safe snapshot of the credential-free pipeline so reviewers can inspect realistic inputs and outputs without downloading the full generated dataset.
+This directory provides a compact, public-safe snapshot of the credential-free pipeline so the inputs and outputs can be inspected without downloading the full generated dataset.
 
 ## What is included
 
 ### Generated source samples
 
-| File | Grain | What it demonstrates |
+| File | Grain | Contents |
 |---|---|---|
 | `sample_data/members_sample.csv` | one row per member | tier, market, and tenure inputs without names, emails, or phone numbers |
 | `sample_data/reservations_sample.csv` | one row per reservation | booking and stay dates, resort linkage, status, nights, points, and revenue |
@@ -16,7 +16,7 @@ This directory provides a compact, public-safe snapshot of the credential-free p
 
 ### Generated platform outputs
 
-| File | Grain | What it demonstrates |
+| File | Grain | Contents |
 |---|---|---|
 | `sample_outputs/member_month_features_sample.csv` | member + as-of month | reusable point-in-time features, including average booking lead time, and the generated validation label |
 | `sample_outputs/waterfall_forecast_sample.csv` | resort + forecast week + run | actuals, predictions, error, model alias, and scoring metadata |
