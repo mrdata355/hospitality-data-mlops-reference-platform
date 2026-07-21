@@ -1,8 +1,8 @@
 # Automated Validation and Acceptance Gates
 
-The test suite validates data-engineering correctness, point-in-time feature behavior, model acceptance, API contracts, reviewer evidence, Databricks workflow controls, environment isolation, and rollback readiness.
+The test suite validates data-engineering correctness, point-in-time feature behavior, model acceptance, API contracts, generated evidence, Databricks workflow controls, environment isolation, and rollback readiness.
 
-GitHub Actions regenerates all synthetic inputs, artifacts, and reviewer samples before running the tests. This prevents committed outputs from masking pipeline failures.
+GitHub Actions regenerates all synthetic inputs, artifacts, and validation samples before running the tests. This prevents committed outputs from masking pipeline failures.
 
 ## Test matrix
 
@@ -13,6 +13,7 @@ GitHub Actions regenerates all synthetic inputs, artifacts, and reviewer samples
 | `test_api.py` | health, readiness, model metadata, Prometheus-style metrics, scoring contract, payload validation, request IDs |
 | `test_examples.py` | sample-file presence, compact row limits, public-safe schemas, feature and forecast grains, quality status, validation summary |
 | `test_production_assets.py` | independent-use disclaimer, environment catalog isolation, workflow dependency order, promotion before scoring, runtime catalog configuration, SQL parameterization, acceptance gates, local/MLflow model sources, rollback workflow |
+| `test_system_validation_assets.py` | neutral system-validation assets, manual Azure workflow, OIDC configuration, and claim boundaries |
 
 ## Acceptance thresholds
 
@@ -93,7 +94,7 @@ make validate
 install dependencies
 → compile Python assets
 → run deterministic pipeline
-→ regenerate reviewer samples
+→ regenerate validation samples
 → verify no sample drift
 → execute pytest
 → enforce model acceptance gates
