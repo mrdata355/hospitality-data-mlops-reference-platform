@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.14-slim
 
 ARG SERVICE_VERSION=1.1.0
 ARG VCS_REF=unknown
