@@ -5,9 +5,10 @@ import json
 import threading
 import time
 import uuid
+from collections.abc import Iterable
 from dataclasses import dataclass
 from enum import Enum
-from typing import Iterable, Protocol
+from typing import Protocol
 
 from .models import (
     AuditEvent,
@@ -214,7 +215,9 @@ class LLMGateway:
 
         candidates = self._eligible(request)
         if not candidates:
-            raise ProviderUnavailable("No provider satisfies classification, capability, and latency policy.")
+            raise ProviderUnavailable(
+                "No provider satisfies classification, capability, and latency policy."
+            )
 
         for provider in candidates:
             name = provider.config.name
@@ -282,7 +285,9 @@ class LLMGateway:
             )
             return response
 
-        raise ProviderUnavailable("All eligible providers failed or were unavailable: " + "; ".join(failures))
+        raise ProviderUnavailable(
+            "All eligible providers failed or were unavailable: " + "; ".join(failures)
+        )
 
     def status(self) -> dict[str, object]:
         return {
@@ -343,7 +348,9 @@ def default_provider_configs() -> tuple[ProviderConfig, ProviderConfig]:
     )
 
 
-def build_default_gateway(primary_failures: int = 0, workflow_budget_usd: float = 2.0) -> LLMGateway:
+def build_default_gateway(
+    primary_failures: int = 0, workflow_budget_usd: float = 2.0
+) -> LLMGateway:
     primary, fallback = default_provider_configs()
     providers = (
         DeterministicProvider(primary, failures_before_success=primary_failures),
