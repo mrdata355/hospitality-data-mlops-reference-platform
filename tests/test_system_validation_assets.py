@@ -30,6 +30,6 @@ def test_system_validation_document_preserves_claim_boundaries() -> None:
     for phrase in (
         "generated non-production data only",
         "not claims of real-customer predictive lift",
-        "not claims of real-customer predictive lift",
+        "production authorization",
     ):
         assert phrase in guide
