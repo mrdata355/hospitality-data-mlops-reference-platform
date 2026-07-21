@@ -1,4 +1,4 @@
-.PHONY: install run examples test backtest validate quality security api container-up container-smoke benchmark system-validation system-validation-live azure-deploy container-down loadtest clean
+.PHONY: install run examples test backtest validate quality security api ai-ops-api ai-ops-test ai-ops-demo container-up container-smoke benchmark system-validation system-validation-live azure-deploy container-down loadtest clean
 
 install:
 	python -m pip install -r requirements.txt
@@ -30,6 +30,15 @@ security:
 
 api:
 	uvicorn hospitality_data_platform.api:app --app-dir src --reload --port 8080
+
+ai-ops-api:
+	uvicorn hospitality_data_platform.ai_ops_api:app --app-dir src --reload --port 8090
+
+ai-ops-test:
+	pytest -q tests/test_ai_ops.py
+
+ai-ops-demo:
+	python scripts/run_ai_ops_demo.py
 
 container-up: run
 	docker compose up --build -d
