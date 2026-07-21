@@ -19,7 +19,12 @@ from .tools import ToolRegistry, build_default_tool_registry
 
 
 class IncidentOrchestrator:
-    def __init__(self, gateway: LLMGateway, tools: ToolRegistry, guard: PromptInjectionGuard | None = None):
+    def __init__(
+        self,
+        gateway: LLMGateway,
+        tools: ToolRegistry,
+        guard: PromptInjectionGuard | None = None,
+    ):
         self.gateway = gateway
         self.tools = tools
         self.guard = guard or PromptInjectionGuard()
@@ -41,7 +46,10 @@ class IncidentOrchestrator:
         )
 
         agents: list[AgentResult] = []
-        if signal.incident_type in {IncidentType.FORECAST_DEGRADATION, IncidentType.PIPELINE_FAILURE}:
+        if signal.incident_type in {
+            IncidentType.FORECAST_DEGRADATION,
+            IncidentType.PIPELINE_FAILURE,
+        }:
             agents.append(self.forecast_agent.run(signal))
             agents.append(self.reliability_agent.run(signal))
         elif signal.incident_type is IncidentType.SERVING_DEGRADATION:
