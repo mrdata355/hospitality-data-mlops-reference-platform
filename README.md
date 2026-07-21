@@ -1,21 +1,24 @@
-# Hospitality Data and MLOps Reference Platform
+# Hospitality Data, MLOps, and AI Operations Reference Platform
 
 [![Platform CI](https://github.com/mrdata355/hospitality-data-mlops-reference-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/mrdata355/hospitality-data-mlops-reference-platform/actions/workflows/ci.yml)
+[![AI Operations CI](https://github.com/mrdata355/hospitality-data-mlops-reference-platform/actions/workflows/ai-ops-ci.yml/badge.svg)](https://github.com/mrdata355/hospitality-data-mlops-reference-platform/actions/workflows/ai-ops-ci.yml)
 
 **Maintainer:** Kellon Lewis  
-**Core stack:** Python, SQL, Spark, PySpark, Databricks, Delta Lake, Unity Catalog design, MLflow, FastAPI, Docker, Kubernetes  
-**Release:** 1.1.0
+**Core stack:** Python, SQL, Spark, PySpark, Databricks, Delta Lake, Unity Catalog design, MLflow, FastAPI, agentic AI, Docker, Kubernetes  
+**Release:** 2.0.0
 
 > **Independent reference implementation.** This repository uses deterministic generated data. It contains no real customer records, production credentials, proprietary source mappings, or confidential internal architecture. It does not represent an approved or deployed production system for any real company.
 
 ## Platform scope
 
-The repository implements one connected hospitality data and MLOps platform spanning governed lakehouse processing, reusable point-in-time features, resort-week forecasting, member-risk modeling, analytical products, MLflow lifecycle controls, batch and API scoring, secured container serving, Kubernetes deployment definitions, monitoring, rollback, and incident response.
+The repository implements one connected hospitality data, MLOps, and AI operations platform spanning governed lakehouse processing, reusable point-in-time features, resort-week forecasting, member-risk modeling, analytical products, MLflow lifecycle controls, batch and API scoring, secured container serving, Kubernetes deployment definitions, monitoring, rollback, incident response, multi-provider AI routing, specialized operations agents, policy enforcement, and human-approved high-risk actions.
 
-The system is organized around the technical handoffs between data engineering, feature engineering, data science, analytics, and MLOps.
+The system is organized around the technical handoffs between data engineering, feature engineering, data science, analytics, MLOps, platform operations, and governed AI automation.
 
-### Validation and design references
+### Version 2 entry points
 
+- [Version 2 capability summary](V2_AI_OPERATIONS.md)
+- [AI operations architecture and controls](docs/AI_OPERATIONS_CONTROL_PLANE.md)
 - [Generated sample data and outputs](examples/README.md)
 - [System validation walkthrough](docs/SYSTEM_VALIDATION_WALKTHROUGH.md)
 - [Serving validation and release controls](docs/SERVING_VALIDATION.md)
@@ -28,17 +31,20 @@ The system is organized around the technical handoffs between data engineering, 
 | Evidence | Result |
 |---|---:|
 | Deterministic pipeline | Working credential-free execution path |
-| Automated validation | Pipeline, grain, feature, model, API, sample-pack, deployment, and serving tests |
+| Automated validation | Pipeline, grain, feature, model, API, sample-pack, deployment, serving, and AI operations tests |
 | Member-risk model | ROC AUC `0.810+` after the booking lead-time feature expansion |
 | Resort-week forecast | WAPE `0.249` |
 | Seasonal baseline | WAPE `0.265` |
 | Source domains | 12 generated operational domains |
 | Visible generated samples | 5 source datasets, 3 output datasets, and a validation summary |
+| AI operations evaluation | `1.0` deterministic scenario pass rate across grounding, failover, security, authorization, budget, and approval gates |
+| Provider resilience | Primary-provider failure injection, circuit opening, and approved fallback routing |
+| High-risk action control | Model rollback remains blocked until a named human approver authorizes execution |
 | Running-container release gate | Docker image must build, start, become ready, score, expose metrics, and pass security checks |
 | Versioned image release | GitHub Container Registry workflow with multi-architecture builds, provenance, and SBOM |
 | Deployment definitions | Databricks, MLflow, Docker Compose, Kubernetes, CI/CD |
 
-GitHub Actions regenerates the synthetic inputs, builds the data products, creates features, trains and evaluates the models, exports the sample pack, runs tests, transfers the validated model artifact into a clean serving job, builds the Docker image, runs it with restricted privileges, and executes an end-to-end scoring smoke test. The CI badge is green only when both model validation and actual container serving succeed.
+GitHub Actions regenerates the synthetic inputs, builds the data products, creates features, trains and evaluates the models, exports the sample pack, runs tests, transfers the validated model artifact into a clean serving job, builds the Docker image, runs it with restricted privileges, and executes an end-to-end scoring smoke test. A separate AI operations workflow compiles the control plane, runs the policy and agent tests, injects a provider failure, validates the incident workflow, enforces acceptance gates, and retains machine-readable evidence.
 
 ## Generated data and outputs
 
@@ -58,6 +64,7 @@ The committed [`examples/`](examples/README.md) directory exposes generated inpu
 - resort-week forecast predictions and errors
 - data-quality results
 - model metrics, source volumes, drift status, and acceptance gates
+- AI incident reports, provider routing traces, policy decisions, and evaluation evidence
 
 The examples are deterministic and synchronized with the pipeline by CI:
 
@@ -76,6 +83,7 @@ python scripts/export_examples.py
 | **Resort-week forecasting** | Controlled demand-forecast lifecycle | lag features, chronological validation, baseline gates, MLflow promotion, rollback |
 | **Resort labor efficiency** | Staffing and operating-efficiency signals | resort-day model, cost per occupied unit, revenue per labor hour, anomaly flags |
 | **MLOps control plane** | Reliable model delivery and operations | CI/CD, registry, aliases, container serving, Kubernetes, monitoring, SLOs, runbooks |
+| **AI operations control plane** | Evidence-grounded incident diagnosis and controlled response | provider routing, circuit breakers, budgets, prompt security, role-based tools, specialized agents, human approval, audit evidence |
 
 ## Architecture
 
@@ -99,7 +107,15 @@ flowchart LR
     N --> Q[Serving metrics and smoke evidence]
     O --> R[Accuracy and drift monitoring]
     Q --> S[Kubernetes deployment and release controls]
-    R --> T[Rollback and incident response]
+    R --> T[Incident signal and runbook evidence]
+    T --> U[AI operations orchestrator]
+    U --> V[Forecast and data reliability agents]
+    V --> W[Policy-governed provider gateway]
+    U --> X[Incident commander]
+    X --> Y{High-risk action?}
+    Y -->|No| Z[Actionable report]
+    Y -->|Yes| AA[Human approval gate]
+    AA --> AB[Versioned rollback action]
 ```
 
 ## Platform capability snapshot
@@ -118,33 +134,36 @@ flowchart LR
 | CI/CD and MLOps | GitHub Actions, artifact handoff, model acceptance, container smoke test, release versioning, and evidence retention |
 | Container serving | fixed non-root identity, read-only filesystem, dropped capabilities, readiness, version metadata, score test, and metrics |
 | Kubernetes | versioned GHCR image, probes, HPA, PDB, topology spread, NetworkPolicy, workload identity, and resources |
+| Governed AI routing | provider capability, classification, latency, cost, health, fallback, and circuit policy |
+| Agent security | prompt-injection blocking, sensitive metadata redaction, role-based tools, and action-risk declarations |
+| Agent operations | forecast analyst, data reliability investigator, incident commander, grounded evidence, and audit traces |
+| Human-in-the-loop control | explicit named approval before model rollback execution |
 | Azure-oriented deployment path | Databricks targets, AKS patterns, workload-identity placeholder, and secret boundaries |
 
-See [`docs/CAPABILITY_MATRIX.md`](docs/CAPABILITY_MATRIX.md) for the complete implementation index.
+See [`docs/CAPABILITY_MATRIX.md`](docs/CAPABILITY_MATRIX.md) for the broader implementation index and [`docs/AI_OPERATIONS_CONTROL_PLANE.md`](docs/AI_OPERATIONS_CONTROL_PLANE.md) for the Version 2 control model.
 
 ## Local validation
 
-The complete local path works without Azure, Databricks, MLflow, Kubernetes, or registry credentials.
+The complete local path works without Azure, Databricks, MLflow, Kubernetes, registry credentials, or external LLM credentials.
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate              # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 make validate
+make ai-ops-test
+make ai-ops-demo
 make api
+make ai-ops-api
 ```
 
-`make validate` generates all 12 source domains, builds the pipeline, exports the sample pack, trains both models, and runs the complete test suite.
+`make validate` generates all 12 source domains, builds the pipeline, exports the sample pack, trains both models, and runs the complete test suite. `make ai-ops-demo` injects a forecast incident and primary-provider failure, validates fallback routing and grounded diagnosis, applies the human-approval boundary, and writes evidence under `artifacts/ai_ops/`.
 
-Inspect the direct application process:
+Inspect the application processes:
 
 ```text
-http://localhost:8080/docs
-http://localhost:8080/health
-http://localhost:8080/ready
-http://localhost:8080/version
-http://localhost:8080/model-info
-http://localhost:8080/metrics
+Member-risk service: http://localhost:8080/docs
+AI operations service: http://localhost:8090/docs
 ```
 
 ## Production-style container serving
@@ -153,7 +172,7 @@ Generate the local model, build the hardened image, start the service, and execu
 
 ```bash
 python scripts/run_all.py
-BUILD_SHA=local-test SERVICE_VERSION=1.1.0 docker compose up --build -d
+BUILD_SHA=local-test SERVICE_VERSION=2.0.0 docker compose up --build -d
 python scripts/smoke_test_serving.py \
   --base-url http://localhost:8080 \
   --evidence artifacts/serving/local-smoke.json
@@ -178,7 +197,10 @@ The container runs as UID/GID `10001`, with a read-only root filesystem, an in-m
 12. Run the image with production-style restrictions and verify health, readiness, version, model metadata, scoring, and metrics.
 13. Publish versioned multi-architecture images on approved release tags.
 14. Deploy through Kubernetes rolling updates and monitor accuracy, drift, latency, errors, and availability.
-15. Preserve prior model and application versions for independent rollback.
+15. Convert data, model, and serving degradation into typed incident signals.
+16. Route evidence-grounded analysis through healthy, policy-eligible providers within budget.
+17. Block unauthorized tools, prompt injection, sensitive metadata leakage, and unapproved high-risk actions.
+18. Preserve provider traces, findings, approvals, prior model versions, and application versions for independent audit and rollback.
 
 ## Feature engineering design
 
@@ -204,7 +226,7 @@ Signals include 1-, 4-, 13-, and 52-week lags, 4- and 13-week rolling means, sea
 - tests recompute booking lead time directly from Silver stay records
 - managed deployment records model signatures and aliases
 
-## MLOps controls
+## MLOps and AI operations controls
 
 - isolated development, staging, and production catalogs
 - Databricks Asset Bundle variables and workflow ordering
@@ -218,20 +240,27 @@ Signals include 1-, 4-, 13-, and 52-week lags, 4- and 13-week rolling means, sea
 - versioned GHCR release workflow with multi-architecture builds, provenance, and SBOM
 - Kubernetes rolling deployment, HPA, PDB, topology spreading, workload identity, and NetworkPolicy
 - SLOs, incident severity, replay procedures, security guidance, and cost controls
+- policy-governed model-provider routing with per-workflow budgets and request cost ceilings
+- provider failure isolation through circuit breakers and approved fallback selection
+- prompt-injection checks and sensitive metadata redaction before provider calls
+- permissioned tools with explicit roles, risks, and approval requirements
+- deterministic agent evaluation and retained incident evidence
 
 ## Repository map
 
 ```text
-examples/                       compact generated inputs, outputs, metrics, and quality evidence
-src/hospitality_data_platform/  local pipeline, features, models, API, monitoring
-sql/databricks/                 Spark SQL ingestion, MERGE, dimensions, Gold, features, monitoring
-databricks/                     Asset Bundle, workflows, training, promotion, scoring, rollback
-components/                     ownership and interface documentation for the integrated domains
-docs/                           architecture, contracts, serving validation, SLOs, runbooks, ADRs
-tests/                          data, feature, model, API, examples, serving, and deployment validation
-k8s/                            versioned deployment, service, autoscaling, disruption and network controls
-loadtest/                       representative API load and response-contract validation
-.github/                        CI validation and versioned container release workflows
+examples/                                      compact generated inputs, outputs, metrics, and quality evidence
+src/hospitality_data_platform/                 local pipeline, features, models, API, monitoring
+src/hospitality_data_platform/ai_ops/          gateway, security, tools, agents, workflow, evaluation
+src/hospitality_data_platform/ai_ops_api.py    independently deployable AI operations API
+sql/databricks/                                Spark SQL ingestion, MERGE, dimensions, Gold, features, monitoring
+databricks/                                    Asset Bundle, workflows, training, promotion, scoring, rollback
+components/                                    ownership and interface documentation for the integrated domains
+docs/                                          architecture, contracts, serving validation, SLOs, runbooks, ADRs
+tests/                                         data, feature, model, API, AI operations, serving, and deployment validation
+k8s/                                           versioned deployment, service, autoscaling, disruption and network controls
+loadtest/                                      representative API load and response-contract validation
+.github/                                       platform, AI operations, security, quality, and release workflows
 ```
 
 ## Managed Databricks path
@@ -259,6 +288,8 @@ The managed path requires authorized infrastructure, source volumes, identities,
 
 ## Documentation
 
+- [Version 2 capability summary](V2_AI_OPERATIONS.md)
+- [AI operations architecture and controls](docs/AI_OPERATIONS_CONTROL_PLANE.md)
 - [Generated sample data and outputs](examples/README.md)
 - [System validation walkthrough](docs/SYSTEM_VALIDATION_WALKTHROUGH.md)
 - [Serving validation and release controls](docs/SERVING_VALIDATION.md)
