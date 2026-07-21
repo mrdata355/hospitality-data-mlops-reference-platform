@@ -38,14 +38,18 @@ def run_evaluation_suite() -> EvaluationSummary:
     )
     report = orchestrator.analyze(signal)
     successful_routes = [item for item in report.routing_trace if item.get("outcome") == "success"]
-    failed_routes = [item for item in report.routing_trace if item.get("outcome") == "provider_failure"]
+    failed_routes = [
+        item for item in report.routing_trace if item.get("outcome") == "provider_failure"
+    ]
     checks["provider_failover"] = bool(failed_routes) and any(
         item.get("provider") == "resilient-fallback-provider" for item in successful_routes
     )
     checks["grounded_agent_outputs"] = all(
         result.evidence and result.tool_calls for result in report.agents
     )
-    checks["human_approval_gate"] = report.approval_required and report.status == "AWAITING_APPROVAL"
+    checks["human_approval_gate"] = (
+        report.approval_required and report.status == "AWAITING_APPROVAL"
+    )
     checks["severity_assignment"] = report.severity.value == "SEV2"
     evidence["report_id"] = report.report_id
     evidence["providers"] = [item.get("provider") for item in successful_routes]
@@ -99,7 +103,9 @@ def run_evaluation_suite() -> EvaluationSummary:
         "scenario_pass_rate": round(passed / total, 4),
         "prompt_injection_block_rate": 1.0 if checks["prompt_injection_blocked"] else 0.0,
         "tool_authorization_enforcement_rate": 1.0 if checks["tool_permission_enforced"] else 0.0,
-        "human_approval_compliance_rate": 1.0 if checks["approval_required_before_action"] else 0.0,
+        "human_approval_compliance_rate": (
+            1.0 if checks["approval_required_before_action"] else 0.0
+        ),
         "provider_failover_success_rate": 1.0 if checks["provider_failover"] else 0.0,
         "grounded_output_rate": 1.0 if checks["grounded_agent_outputs"] else 0.0,
     }
