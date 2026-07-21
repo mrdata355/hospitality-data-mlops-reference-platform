@@ -1,0 +1,53 @@
+name: ai-operations-ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ai-operations-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-ai-operations:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install exact dependencies
+        run: pip install -r requirements.txt
+      - name: Compile AI operations assets
+        run: >-
+          python -m compileall -q
+          src/hospitality_data_platform/ai_ops
+          src/hospitality_data_platform/ai_ops_api.py
+          scripts/run_ai_ops_demo.py
+      - name: Run AI operations tests
+        run: pytest -q tests/test_ai_ops.py
+      - name: Run deterministic incident and evaluation demo
+        run: python scripts/run_ai_ops_demo.py
+      - name: Enforce AI operations acceptance gates
+        run: |
+          python - <<'PY'
+          import json
+          summary = json.load(open('artifacts/ai_ops/evaluation_summary.json'))
+          assert summary['metrics']['scenario_pass_rate'] == 1.0, summary
+          assert summary['metrics']['provider_failover_success_rate'] == 1.0, summary
+          assert summary['metrics']['prompt_injection_block_rate'] == 1.0, summary
+          assert summary['metrics']['human_approval_compliance_rate'] == 1.0, summary
+          PY
+      - name: Upload AI operations evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-operations-evidence
+          path: artifacts/ai_ops
+          if-no-files-found: error
+          retention-days: 14
