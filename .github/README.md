@@ -1,55 +1,57 @@
 # GitHub Automation and Release Controls
 
-This directory defines the repository controls that make the platform reproducible, reviewable, and safe to promote.
+This directory defines the repository controls used to validate changes, retain evidence, manage dependencies, and publish versioned container images.
 
-## Continuous integration
+## Workflows
 
-`workflows/ci.yml` executes the credential-free validation path on pull requests and protected-branch updates.
+| Workflow | Trigger | Primary controls |
+|---|---|---|
+| `workflows/ci.yml` | pull requests and `main` updates | deterministic pipeline execution, automated tests, model acceptance gates, validated artifact handoff, restricted-container smoke testing, and concurrent API benchmarking |
+| `workflows/quality.yml` | pull requests and `main` updates | changed-file Ruff checks, branch coverage, rolling-origin forecast backtesting, evidence-contract validation, and Python dependency auditing |
+| `workflows/codeql.yml` | pull requests, `main`, weekly schedule | Python CodeQL analysis with the `security-extended` query suite |
+| `workflows/release-image.yml` | approved release tags | multi-architecture GHCR image publication with provenance and SBOM output |
 
-| CI stage | Control objective |
-|---|---|
-| Dependency installation | Recreate the supported Python environment |
-| Python compilation | Detect syntax and import-time defects early |
-| Deterministic pipeline | Regenerate source data, lakehouse outputs, features, models, predictions, and monitoring evidence |
-| Automated tests | Validate dimensional grain, foreign keys, point-in-time features, API behavior, and deployment assets |
-| Model acceptance gates | Enforce member-risk ROC AUC and forecast WAPE requirements |
-| Release-asset checks | Confirm Databricks, rollback, Kubernetes, operations, and readiness assets are present |
+The workflows are intentionally separated so pipeline correctness, software quality, dependency security, static analysis, serving behavior, and release publication remain independently visible.
+
+## Dependency maintenance
+
+`dependabot.yml` checks Python packages, GitHub Actions, and Docker dependencies each week. Dependency changes arrive as normal pull requests and must pass the same validation gates as application changes.
 
 ## Pull-request standard
 
-Every material change should include:
+Every material change should document:
 
-- a focused engineering purpose
-- automated validation evidence
-- data-contract or feature-grain impact
+- the business, data, model, or platform outcome
+- affected data contracts, grains, schemas, and interfaces
+- automated validation performed
 - model-metric impact when applicable
-- deployment and rollback considerations
-- confirmation that no credentials or production data were introduced
+- runtime, cost, observability, migration, and rollback considerations
+- confirmation that no credentials, production extracts, or confidential mappings were introduced
 
 ## Security boundary
 
-Cloud credentials are intentionally excluded from source control. Authorized deployments must supply credentials through GitHub Actions secrets, workload identity, managed identity, or another approved secret-management mechanism.
+Cloud credentials are excluded from source control. Authorized deployments must provide identity and secret material through approved platform controls such as GitHub Actions secrets, workload identity, managed identity, or an external secret manager.
 
-The repository should never contain:
+The repository must not contain:
 
 - customer or employee records
 - production extracts
 - tokens, passwords, private keys, or service-principal secrets
-- `.env`, Databricks profiles, or kubeconfigs
-- confidential source-system mappings or internal architecture
+- `.env` files, Databricks profiles, or kubeconfigs
+- confidential source-system mappings or internal company architecture
 
 ## Recommended branch protection
 
 For an enterprise deployment, configure `main` to require:
 
 - pull requests instead of direct pushes
-- successful `platform-ci` checks
+- successful platform, quality, dependency-security, and CodeQL checks
 - at least one technical approval
 - dismissal of stale approvals after new commits
-- conversation resolution
-- signed commits or verified organizational identity where required
+- resolution of review conversations
 - restricted force pushes and branch deletion
+- signed commits or verified organizational identity where required
 
 ## Release principle
 
-A code merge does not automatically authorize a production deployment. Production promotion additionally requires environment-specific identities, approved data contracts, security controls, model acceptance evidence, a rollback target, and change approval.
+A merge confirms that repository validation passed. It does not authorize production deployment. Production promotion additionally requires environment-specific identities, approved data contracts, target-environment testing, security review, model acceptance evidence, a rollback target, and change approval.
