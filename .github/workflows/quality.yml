@@ -1,0 +1,210 @@
+name: quality-and-dependency-security
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: lint-coverage-and-backtesting
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+      - name: Install exact dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Compile Python assets
+        run: >-
+          python -m compileall -q
+          src
+          scripts
+          tests
+          databricks/src_databricks
+          sql/databricks/01_bronze_autoloader.py
+      - name: Collect changed Python files
+        shell: bash
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PUSH_BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          mkdir -p artifacts/quality
+          if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
+            base_sha="${PR_BASE_SHA}"
+            head_sha="${PR_HEAD_SHA}"
+          else
+            base_sha="${PUSH_BEFORE_SHA}"
+            head_sha="${GITHUB_SHA}"
+          fi
+          if [ -z "${base_sha}" ] || [[ "${base_sha}" =~ ^0+$ ]]; then
+            base_sha="$(git rev-parse "${head_sha}^")"
+          fi
+          git diff --name-only --diff-filter=ACMR "${base_sha}" "${head_sha}" -- '*.py' \
+            | sort -u \
+            | tee artifacts/quality/changed-python-files.txt
+      - name: Run static checks on changed Python
+        id: ruff_check
+        continue-on-error: true
+        shell: bash
+        run: |
+          mapfile -t files < artifacts/quality/changed-python-files.txt
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "No changed Python files."
+            exit 0
+          fi
+          set +e
+          python -m ruff check "${files[@]}" --output-format concise \
+            2>&1 | tee artifacts/quality/ruff-check.txt
+          exit "${PIPESTATUS[0]}"
+      - name: Verify formatting on changed Python
+        id: ruff_format
+        continue-on-error: true
+        shell: bash
+        run: |
+          mapfile -t files < artifacts/quality/changed-python-files.txt
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "No changed Python files."
+            exit 0
+          fi
+          set +e
+          python -m ruff format --check "${files[@]}" \
+            2>&1 | tee artifacts/quality/ruff-format.txt
+          exit "${PIPESTATUS[0]}"
+      - name: Generate Ruff repair patch
+        if: steps.ruff_check.outcome != 'success' || steps.ruff_format.outcome != 'success'
+        shell: bash
+        run: |
+          mapfile -t files < artifacts/quality/changed-python-files.txt
+          if [ "${#files[@]}" -eq 0 ]; then
+            exit 0
+          fi
+          python -m ruff check --fix "${files[@]}" || true
+          python -m ruff format "${files[@]}"
+          git diff -- "${files[@]}" > artifacts/quality/ruff-fixes.patch
+      - name: Run pipeline and tests with branch coverage
+        id: coverage
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          python -m coverage erase
+          python -m coverage run scripts/run_all.py
+          pipeline_status=$?
+          python -m coverage run --append -m pytest -q
+          test_status=$?
+          python -m coverage report 2>&1 | tee artifacts/quality/coverage.txt
+          coverage_status=${PIPESTATUS[0]}
+          python -m coverage xml -o artifacts/quality/coverage.xml || true
+          status=$((pipeline_status || test_status || coverage_status))
+          exit "${status}"
+      - name: Run rolling-origin forecast backtest
+        id: backtest
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          python scripts/run_backtests.py \
+            2>&1 | tee artifacts/quality/backtest.txt
+          exit "${PIPESTATUS[0]}"
+      - name: Validate backtest evidence contract
+        id: backtest_contract
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          python - <<'PY' 2>&1 | tee artifacts/quality/backtest-contract.txt
+          import json
+          import math
+
+          report = json.load(open("artifacts/metrics/waterfall_backtest_metrics.json"))
+          assert report["fold_count"] >= 2, report
+          assert report["validation_rows"] > 0, report
+          assert math.isfinite(report["aggregate_wape"]), report
+          assert math.isfinite(report["aggregate_baseline_wape"]), report
+          assert 0.0 <= report["baseline_win_rate"] <= 1.0, report
+          for fold in report["folds"]:
+              assert fold["train_end"] < fold["validation_start"], fold
+          PY
+          exit "${PIPESTATUS[0]}"
+      - name: Upload quality evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-evidence
+          path: |
+            artifacts/quality/
+            artifacts/metrics/waterfall_backtest_metrics.json
+            artifacts/predictions/waterfall_backtest_predictions.csv
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Enforce quality gates
+        if: always()
+        run: |
+          test "${{ steps.ruff_check.outcome }}" = "success"
+          test "${{ steps.ruff_format.outcome }}" = "success"
+          test "${{ steps.coverage.outcome }}" = "success"
+          test "${{ steps.backtest.outcome }}" = "success"
+          test "${{ steps.backtest_contract.outcome }}" = "success"
+
+  dependency-audit:
+    name: audit-python-dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - name: Install audit tooling
+        run: python -m pip install "pip-audit==2.10.1"
+      - name: Audit exact runtime dependencies
+        id: pip_audit
+        continue-on-error: true
+        shell: bash
+        run: |
+          mkdir -p artifacts/security
+          set +e
+          python -m pip_audit -r requirements.txt \
+            --format json --output artifacts/security/pip-audit.json
+          status=$?
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("artifacts/security/pip-audit.json")
+          if path.exists():
+              report = json.loads(path.read_text())
+              print(json.dumps(report, indent=2))
+          PY
+          exit "${status}"
+      - name: Upload dependency-audit evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-audit-evidence
+          path: artifacts/security/
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Enforce dependency audit
+        if: always()
+        run: test "${{ steps.pip_audit.outcome }}" = "success"
