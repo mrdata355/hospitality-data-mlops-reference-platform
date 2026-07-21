@@ -9,6 +9,8 @@ updates:
       timezone: America/New_York
     open-pull-requests-limit: 5
     labels: [dependencies, python]
+    commit-message:
+      prefix: deps
 
   - package-ecosystem: github-actions
     directory: "/"
@@ -19,6 +21,8 @@ updates:
       timezone: America/New_York
     open-pull-requests-limit: 5
     labels: [dependencies, github-actions]
+    commit-message:
+      prefix: ci
 
   - package-ecosystem: docker
     directory: "/"
@@ -29,3 +33,5 @@ updates:
       timezone: America/New_York
     open-pull-requests-limit: 3
     labels: [dependencies, container]
+    commit-message:
+      prefix: container
