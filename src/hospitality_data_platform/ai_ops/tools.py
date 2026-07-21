@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
-from typing import Any, Callable, Mapping
+from typing import Any
 
 from .models import ActionRisk, AgentRole, Evidence, ToolCall
 
@@ -199,9 +200,15 @@ def build_default_tool_registry() -> ToolRegistry:
     registry.register(
         ToolSpec(
             name="lineage_lookup",
-            description="Governed upstream-to-downstream lineage path for the affected data product.",
+            description=(
+                "Governed upstream-to-downstream lineage path for the affected data product."
+            ),
             allowed_roles=frozenset(
-                {AgentRole.FORECAST_OPERATIONS, AgentRole.DATA_RELIABILITY, AgentRole.INCIDENT_COMMANDER}
+                {
+                    AgentRole.FORECAST_OPERATIONS,
+                    AgentRole.DATA_RELIABILITY,
+                    AgentRole.INCIDENT_COMMANDER,
+                }
             ),
             action_risk=ActionRisk.LOW,
             requires_approval=False,
@@ -213,7 +220,11 @@ def build_default_tool_registry() -> ToolRegistry:
             name="runbook_lookup",
             description="Approved operational response procedure for the incident class.",
             allowed_roles=frozenset(
-                {AgentRole.FORECAST_OPERATIONS, AgentRole.DATA_RELIABILITY, AgentRole.INCIDENT_COMMANDER}
+                {
+                    AgentRole.FORECAST_OPERATIONS,
+                    AgentRole.DATA_RELIABILITY,
+                    AgentRole.INCIDENT_COMMANDER,
+                }
             ),
             action_risk=ActionRisk.LOW,
             requires_approval=False,
@@ -243,7 +254,9 @@ def build_default_tool_registry() -> ToolRegistry:
     registry.register(
         ToolSpec(
             name="rollback_model",
-            description="Move the production alias to a previously validated immutable model version.",
+            description=(
+                "Move the production alias to a previously validated immutable model version."
+            ),
             allowed_roles=frozenset({AgentRole.INCIDENT_COMMANDER}),
             action_risk=ActionRisk.HIGH,
             requires_approval=True,
