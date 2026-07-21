@@ -29,7 +29,7 @@ def test_demo_document_preserves_claim_boundaries() -> None:
     guide = (ROOT / "docs/EXECUTIVE_DEMO.md").read_text().lower()
     for phrase in (
         "generated non-production data only",
-        "not a claim of real-customer predictive lift",
+        "neither result is a claim of real-customer predictive lift",
         "not described as a company deployment",
     ):
         assert phrase in guide
