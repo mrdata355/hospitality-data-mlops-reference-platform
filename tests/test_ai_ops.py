@@ -55,9 +55,7 @@ def test_gateway_fails_over_and_opens_primary_circuit():
         )
     )
     assert response.provider == "resilient-fallback-provider"
-    circuit_state = gateway.status()["providers"]["primary-enterprise-provider"]["circuit"][
-        "state"
-    ]
+    circuit_state = gateway.status()["providers"]["primary-enterprise-provider"]["circuit"]["state"]
     assert circuit_state == "OPEN"
 
 
@@ -124,9 +122,7 @@ def test_incident_workflow_is_grounded_and_requires_approval():
     assert len(report.agents) == 2
     assert all(agent.evidence for agent in report.agents)
     assert any(item["outcome"] == "provider_failure" for item in report.routing_trace)
-    assert any(
-        item["provider"] == "resilient-fallback-provider" for item in report.routing_trace
-    )
+    assert any(item["provider"] == "resilient-fallback-provider" for item in report.routing_trace)
 
 
 def test_approved_rollback_changes_report_status():
