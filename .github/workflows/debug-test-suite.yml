@@ -21,4 +21,18 @@ jobs:
       - name: Build deterministic artifacts quietly
         run: python scripts/run_all.py >/dev/null
       - name: Run concise test diagnostics
-        run: pytest -q --tb=short
+        shell: bash
+        run: |
+          set +e
+          pytest -q --tb=short > pytest-output.txt 2>&1
+          status=$?
+          cat pytest-output.txt
+          exit "${status}"
+      - name: Upload test diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-diagnostics
+          path: pytest-output.txt
+          if-no-files-found: error
+          retention-days: 1
