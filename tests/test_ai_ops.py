@@ -7,9 +7,16 @@ from hospitality_data_platform.ai_ops import (
     build_default_orchestrator,
     run_evaluation_suite,
 )
-from hospitality_data_platform.ai_ops.gateway import BudgetExceeded, ProviderRequest, build_default_gateway
+from hospitality_data_platform.ai_ops.gateway import (
+    BudgetExceeded,
+    ProviderRequest,
+    build_default_gateway,
+)
 from hospitality_data_platform.ai_ops.models import AgentRole, DataClassification
-from hospitality_data_platform.ai_ops.security import PromptInjectionGuard, SecurityPolicyViolation
+from hospitality_data_platform.ai_ops.security import (
+    PromptInjectionGuard,
+    SecurityPolicyViolation,
+)
 from hospitality_data_platform.ai_ops.tools import (
     ApprovalRequired,
     UnauthorizedToolAccess,
@@ -48,7 +55,10 @@ def test_gateway_fails_over_and_opens_primary_circuit():
         )
     )
     assert response.provider == "resilient-fallback-provider"
-    assert gateway.status()["providers"]["primary-enterprise-provider"]["circuit"]["state"] == "OPEN"
+    circuit_state = gateway.status()["providers"]["primary-enterprise-provider"]["circuit"][
+        "state"
+    ]
+    assert circuit_state == "OPEN"
 
 
 def test_gateway_enforces_workflow_budget():
@@ -114,7 +124,9 @@ def test_incident_workflow_is_grounded_and_requires_approval():
     assert len(report.agents) == 2
     assert all(agent.evidence for agent in report.agents)
     assert any(item["outcome"] == "provider_failure" for item in report.routing_trace)
-    assert any(item["provider"] == "resilient-fallback-provider" for item in report.routing_trace)
+    assert any(
+        item["provider"] == "resilient-fallback-provider" for item in report.routing_trace
+    )
 
 
 def test_approved_rollback_changes_report_status():
