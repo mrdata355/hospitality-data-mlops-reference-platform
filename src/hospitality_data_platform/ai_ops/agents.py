@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable
 
 from .gateway import LLMGateway
 from .models import (
@@ -69,7 +69,9 @@ class ForecastOperationsAgent:
                 prompt=prompt,
                 workflow="forecast-incident",
                 data_classification=DataClassification.INTERNAL,
-                required_capabilities=frozenset({"analysis", "structured-output", "tool-grounding"}),
+                required_capabilities=frozenset(
+                    {"analysis", "structured-output", "tool-grounding"}
+                ),
                 metadata={"incident_id": signal.incident_id},
             )
         )
@@ -82,7 +84,9 @@ class ForecastOperationsAgent:
         return AgentResult(
             role=self.role,
             objective="Diagnose resort-week forecast degradation.",
-            summary="Forecast quality failed release controls and requires evidence-based remediation.",
+            summary=(
+                "Forecast quality failed release controls and requires evidence-based remediation."
+            ),
             findings=tuple(findings),
             evidence=tuple(evidence),
             recommended_action=action,
@@ -137,7 +141,9 @@ class DataReliabilityAgent:
                 prompt=prompt,
                 workflow="pipeline-incident",
                 data_classification=DataClassification.INTERNAL,
-                required_capabilities=frozenset({"analysis", "structured-output", "tool-grounding"}),
+                required_capabilities=frozenset(
+                    {"analysis", "structured-output", "tool-grounding"}
+                ),
                 metadata={"incident_id": signal.incident_id},
             )
         )
@@ -147,7 +153,9 @@ class DataReliabilityAgent:
             summary="The reservation feed breached freshness controls before feature publication.",
             findings=tuple(findings),
             evidence=tuple(evidence),
-            recommended_action="Quarantine stale partitions, repair ingestion, and replay idempotently.",
+            recommended_action=(
+                "Quarantine stale partitions, repair ingestion, and replay idempotently."
+            ),
             action_risk=ActionRisk.MEDIUM,
             approval_required=False,
             tool_calls=tuple(calls),
@@ -162,7 +170,9 @@ class IncidentCommander:
     tools: ToolRegistry
     role: AgentRole = AgentRole.INCIDENT_COMMANDER
 
-    def assess(self, signal: IncidentSignal, agent_results: Iterable[AgentResult]) -> dict[str, object]:
+    def assess(
+        self, signal: IncidentSignal, agent_results: Iterable[AgentResult]
+    ) -> dict[str, object]:
         evidence: list[Evidence] = []
         calls: list[ToolCall] = []
         for name, payload in (
@@ -193,9 +203,12 @@ class IncidentCommander:
 
         rollback_recommended = wape > baseline + 0.02 or availability < 0.99
         action = (
-            "Roll back to the previous validated model version after human approval, then repair and replay."
+            "Roll back to the previous validated model version after human approval, "
+            "then repair and replay."
             if rollback_recommended
-            else "Hold promotion, repair the upstream fault, and revalidate before resuming release."
+            else (
+                "Hold promotion, repair the upstream fault, and revalidate before resuming release."
+            )
         )
         root_cause = (
             "Reservation ingestion freshness breached its SLO, propagating stale lag features into "
@@ -219,7 +232,9 @@ class IncidentCommander:
                 prompt=prompt,
                 workflow="incident-command",
                 data_classification=DataClassification.INTERNAL,
-                required_capabilities=frozenset({"analysis", "structured-output", "tool-grounding"}),
+                required_capabilities=frozenset(
+                    {"analysis", "structured-output", "tool-grounding"}
+                ),
                 metadata={"incident_id": signal.incident_id},
             )
         )
