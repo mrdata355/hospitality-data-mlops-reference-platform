@@ -1,6 +1,6 @@
 # Managed Databricks, Spark, and MLflow execution dependencies.
 # Install only for an authorized workspace or Databricks Connect environment.
 pyspark>=3.5
-mlflow>=2.15
+mlflow>=3.14.0
 databricks-sdk>=0.30
 databricks-connect>=15.4
