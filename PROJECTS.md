@@ -1,43 +1,43 @@
-# Project Inventory
+# Platform Components
 
-This repository is one integrated production-style platform containing **six independently reviewable projects**.
+This repository implements one connected production-style hospitality data and MLOps platform composed of six bounded engineering domains. Each domain has defined responsibilities, data products, and interfaces to adjacent components.
 
 ## 1. Lakehouse Foundation
 
-Replayable Bronze ingestion, Silver conformance, data contracts, quality gates, conformed dimensions, atomic facts, and Gold publication.
+**Responsibilities:** Replayable Bronze ingestion, Silver conformance, schema enforcement, data contracts, quality gates, conformed dimensions, atomic facts, and Gold publication.
 
-**Role evidence:** SQL, Python, Spark/PySpark, Databricks, dimensional modeling, lakehouse design, schema enforcement, missing-data controls, and reusable curated data products.
+**Primary outputs:** Governed Delta-style tables, dimensional models, quality results, curated marts, and reusable source products for downstream analytics and machine learning.
 
 ## 2. Tour and Contract Attribution
 
-Package-to-tour-to-show-to-contract funnel modeling with controlled grain, campaign attribution, conversion metrics, contract value, and ROAS.
+**Responsibilities:** Package-to-tour-to-show-to-contract funnel modeling with controlled grain, campaign attribution, conversion metrics, contract value, and return-on-ad-spend calculation.
 
-**Role evidence:** scalable analytical feature construction, reusable business definitions, self-service KPI products, and cross-functional marketing support.
+**Primary outputs:** Reconciled funnel facts, campaign performance products, conversion measures, attribution-ready dimensions, and governed self-service KPI definitions.
 
 ## 3. Member Points and Risk
 
-Point-in-time member features, points utilization, service-friction signals, churn-risk classification, batch scores, and a synchronous scoring API.
+**Responsibilities:** Point-in-time member feature construction, points-utilization measures, service-friction signals, churn-risk classification, batch scoring, and synchronous API scoring.
 
-**Role evidence:** reusable ML features, training/inference consistency, feature documentation, feature quality, batch inference, and online inference contracts.
+**Primary outputs:** Versioned member feature products, model-ready datasets, batch predictions, online inference contracts, feature documentation, and quality checks.
 
 ## 4. Resort-Week Demand Forecasting
 
-Lag and rolling features, chronological validation, seasonal-baseline comparison, model acceptance gates, forecast publication, and error monitoring.
+**Responsibilities:** Leakage-safe lag and rolling feature generation, chronological validation, seasonal-baseline comparison, model acceptance gates, forecast publication, monitoring, promotion, and rollback.
 
-**Role evidence:** Waterfall-style forecasting productionalization, leakage-safe temporal features, MLflow lifecycle controls, performance monitoring, and rollback.
+**Primary outputs:** Resort-week feature tables, validated forecast candidates, published forecasts, error metrics, MLflow lifecycle records, and rollback-ready model versions.
 
 ## 5. Resort Labor Efficiency
 
-Resort-day demand and staffing alignment, payroll cost per occupied unit, revenue per labor hour, and staffing anomaly detection.
+**Responsibilities:** Resort-day demand and staffing alignment, payroll cost per occupied unit, revenue per labor hour, and staffing anomaly detection.
 
-**Role evidence:** governed operational metrics, anomaly features, dimensional joins, and analytics products that connect model outputs to business action.
+**Primary outputs:** Governed labor-efficiency marts, staffing variance indicators, anomaly signals, and operational metrics that connect demand patterns to workforce planning.
 
 ## 6. Production MLOps Control Plane
 
-CI/CD, Databricks Asset Bundles, MLflow model registration and alias promotion, batch scoring, FastAPI, Docker, Kubernetes, monitoring, rollback, SLOs, and incident response.
+**Responsibilities:** CI/CD, Databricks Asset Bundles, MLflow model registration and alias promotion, artifact versioning, batch scoring, FastAPI serving, Docker, Kubernetes, observability, rollback, SLOs, and incident response.
 
-**Role evidence:** end-to-end ML delivery, reproducibility, model registry, artifact versioning, deployment automation, observability, security, and production reliability.
+**Primary outputs:** Reproducible builds, validated model artifacts, versioned serving images, deployment definitions, runtime telemetry, release evidence, and operational runbooks.
 
-## Portfolio positioning
+## Integration Model
 
-Present this as **one end-to-end platform with six connected production projects**, not six unrelated demos. The shared contracts, data model, feature definitions, deployment controls, and observability demonstrate system-level engineering judgment.
+The six domains operate as one system through shared source contracts, conformed dimensions, feature definitions, model lifecycle controls, serving interfaces, data-quality standards, and observability conventions. Changes in one domain are validated against downstream dependencies through automated tests and release gates.
