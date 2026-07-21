@@ -11,7 +11,7 @@ from smoke_test_serving import run_smoke_test
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_VALIDATION = ROOT / "examples/sample_outputs/validation_summary.json"
 DEFAULT_BACKTEST = ROOT / "artifacts/metrics/waterfall_backtest_metrics.json"
-DEFAULT_EVIDENCE = ROOT / "artifacts/demo/executive_demo.json"
+DEFAULT_EVIDENCE = ROOT / "artifacts/validation/system_validation.json"
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -29,7 +29,7 @@ def _validate_platform_evidence(validation: dict[str, Any]) -> None:
     if failed:
         raise RuntimeError(f"Platform acceptance gates failed: {failed}")
     if validation.get("data_profile", {}).get("synthetic_data_only") is not True:
-        raise RuntimeError("Executive demo evidence must use generated non-production data only.")
+        raise RuntimeError("System validation must use generated non-production data only.")
 
 
 def build_report(
@@ -103,7 +103,7 @@ def render_console_summary(report: dict[str, Any]) -> str:
     models = report["model_evidence"]
     serving = report["serving_evidence"]
     lines = [
-        "EXECUTIVE DEMO: PASS",
+        "SYSTEM VALIDATION: PASS",
         (
             f"Data: {data['source_domains']} domains | "
             f"{data['reservation_rows']:,} reservations | "
@@ -141,7 +141,7 @@ def render_console_summary(report: dict[str, Any]) -> str:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Validate and summarize the platform for a two-minute executive demonstration."
+        description="Validate data, model, temporal, serving, and metrics contracts."
     )
     parser.add_argument("--base-url", default="http://localhost:8080")
     parser.add_argument("--validation", type=Path, default=DEFAULT_VALIDATION)

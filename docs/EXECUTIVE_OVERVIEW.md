@@ -10,7 +10,7 @@ This independent reference implementation demonstrates how a hospitality organiz
 
 Hospitality decisions are often split across reservation, member, points, marketing, tour, contract, labor, service, and resort systems. The platform establishes stable grains and contracts across those domains so analytics, forecasting, and risk scoring can share the same governed foundation.
 
-## What the system proves
+## Implemented system
 
 The repository implements the path from deterministic source generation through Bronze and Silver processing, conformed dimensions and atomic facts, Gold products, point-in-time features, model training, acceptance gates, MLflow registration and alias control, batch scoring, secured API serving, monitoring, rollback, and incident response.
 
@@ -29,7 +29,7 @@ It also validates the running container rather than treating successful unit tes
 | Serving release gate | Build, restricted run, readiness, score, metrics, benchmark |
 | Forecast robustness | Expanding-window rolling-origin backtest artifact |
 | Software assurance | Ruff, branch coverage, dependency audit, CodeQL |
-| Executive demonstration | One command produces data, model, temporal, API, and metrics evidence |
+| System validation | One command produces data, model, temporal, API, and metrics evidence |
 
 The model measurements are deterministic system-validation evidence produced from generated data. They are not claims of customer impact or real-world predictive lift.
 
@@ -44,15 +44,13 @@ The model measurements are deterministic system-validation evidence produced fro
 - The local path remains reproducible without recurring cloud spend or embedded credentials.
 - Exact direct dependency versions, dependency auditing, static analysis, coverage, and automated update proposals reduce software-supply-chain drift.
 
-## Demonstration path
-
-Run the secured local demonstration with:
+## Validation path
 
 ```bash
-make executive-demo
+make system-validation
 ```
 
-The command regenerates the platform, executes rolling-origin validation, starts the restricted container, validates the live API contract, prints an executive summary, retains machine-readable evidence, and stops the container. See `docs/EXECUTIVE_DEMO.md` for the two-minute narration and the authorized Azure Container Apps path.
+The command regenerates the platform, executes rolling-origin validation, starts the restricted container, validates the live API contract, records machine-readable evidence, and stops the container. The operational procedure is documented in `docs/SYSTEM_VALIDATION.md`.
 
 ## Material boundaries
 
@@ -62,13 +60,11 @@ The manual Azure workflow can create sanitized deployment evidence after an auth
 
 A production authorization would still require approved identities, networking, source contracts, secrets, registry access, production-like volume tests, monitoring destinations, data-owner acceptance, and operational sign-off.
 
-## Recommended review sequence
+## Validation commands
 
-1. Run `make executive-demo` and inspect `artifacts/demo/executive_demo.json`.
-2. Review `README.md` for platform scope and architecture.
-3. Review `docs/MODEL_CARD.md` for intended use, evaluation, limitations, and controls.
-4. Review `.github/workflows/ci.yml` for model-to-container artifact handoff and live serving validation.
-5. Review `.github/workflows/quality.yml` and `.github/workflows/codeql.yml` for software assurance.
-6. Review `scripts/run_backtests.py` and `src/hospitality_data_platform/backtesting.py` for temporal validation.
-7. Review `databricks/resources/jobs.yml` for managed workflow ordering and model promotion.
-8. Review `k8s/`, `docs/PERFORMANCE_VALIDATION.md`, and `docs/EXECUTIVE_DEMO.md` for deployment and serving evidence.
+```bash
+make validate
+make quality
+make security
+make system-validation
+```

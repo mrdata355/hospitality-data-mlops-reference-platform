@@ -1,4 +1,4 @@
-name: deploy-azure-demo
+name: deploy-azure-validation
 
 on:
   workflow_dispatch:
@@ -9,19 +9,19 @@ on:
         default: eastus
         type: string
       resource_group:
-        description: Resource group dedicated to the sanitized demo
+        description: Resource group dedicated to validation resources
         required: true
-        default: hospitality-data-mlops-demo-rg
+        default: hospitality-data-mlops-validation-rg
         type: string
       container_app_environment:
         description: Azure Container Apps environment name
         required: true
-        default: hospitality-demo-env
+        default: hospitality-validation-env
         type: string
       container_app_name:
-        description: Public demo application name
+        description: Validation application name
         required: true
-        default: hospitality-member-risk-demo
+        default: hospitality-member-risk-validation
         type: string
       acr_name:
         description: Globally unique lowercase Azure Container Registry name
@@ -33,15 +33,15 @@ permissions:
   id-token: write
 
 concurrency:
-  group: azure-executive-demo
+  group: azure-system-validation
   cancel-in-progress: false
 
 jobs:
   deploy-and-validate:
-    name: deploy-and-validate-sanitized-demo
+    name: deploy-and-validate-generated-data-system
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    environment: azure-demo
+    environment: azure-validation
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
@@ -82,13 +82,13 @@ jobs:
           PY
           )"
           echo "url=${url}" >> "${GITHUB_OUTPUT}"
-      - name: Validate live application and create executive evidence
+      - name: Validate live application
         run: >-
-          python scripts/run_executive_demo.py
+          python scripts/run_system_validation.py
           --base-url "${{ steps.deployment.outputs.url }}"
           --attempts 60
           --delay-seconds 5
-          --evidence artifacts/deployment/executive-demo.json
+          --evidence artifacts/deployment/system-validation.json
       - name: Finalize deployment evidence
         run: |
           python - <<'PY'
@@ -102,18 +102,18 @@ jobs:
           PY
       - name: Publish workflow summary
         run: |
-          echo "## Azure executive demo" >> "${GITHUB_STEP_SUMMARY}"
+          echo "## Azure system validation" >> "${GITHUB_STEP_SUMMARY}"
           echo "" >> "${GITHUB_STEP_SUMMARY}"
           echo "Deployment and application validation passed." >> "${GITHUB_STEP_SUMMARY}"
           echo "" >> "${GITHUB_STEP_SUMMARY}"
-          echo "Demo URL: ${{ steps.deployment.outputs.url }}" >> "${GITHUB_STEP_SUMMARY}"
+          echo "Application URL: ${{ steps.deployment.outputs.url }}" >> "${GITHUB_STEP_SUMMARY}"
           echo "" >> "${GITHUB_STEP_SUMMARY}"
           echo "Data boundary: generated non-production data only." >> "${GITHUB_STEP_SUMMARY}"
       - name: Upload sanitized deployment evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: azure-executive-demo-evidence
+          name: azure-system-validation-evidence
           path: artifacts/deployment/
           if-no-files-found: error
           retention-days: 14

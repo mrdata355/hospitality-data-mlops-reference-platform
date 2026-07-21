@@ -35,9 +35,11 @@ jobs:
           scripts/smoke_test_serving.py
           scripts/benchmark_serving.py
           scripts/run_backtests.py
+          scripts/run_system_validation.py
+          scripts/run_local_system_validation.py
       - name: Run deterministic pipeline
         run: python scripts/run_all.py
-      - name: Rebuild reviewer sample pack
+      - name: Rebuild generated sample pack
         run: |
           python scripts/export_examples.py
           git diff --exit-code -- examples
@@ -59,6 +61,7 @@ jobs:
           test -f docs/EXECUTIVE_OVERVIEW.md
           test -f docs/IMPLEMENTATION_EVIDENCE.md
           test -f docs/SYSTEM_VALIDATION_WALKTHROUGH.md
+          test -f docs/SYSTEM_VALIDATION.md
           test -f docs/CAPABILITY_MATRIX.md
           test -f docs/SERVING_VALIDATION.md
           test -f docs/MODEL_CARD.md

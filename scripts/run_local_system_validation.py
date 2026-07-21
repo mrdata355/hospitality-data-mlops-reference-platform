@@ -24,12 +24,12 @@ def _git_sha() -> str:
         capture_output=True,
         text=True,
     )
-    return result.stdout.strip() if result.returncode == 0 else "local-demo"
+    return result.stdout.strip() if result.returncode == 0 else "local-validation"
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Build, start, validate, and stop the local executive demo stack."
+        description="Build, start, validate, and stop the local system stack."
     )
     parser.add_argument("--base-url", default="http://localhost:8080")
     parser.add_argument("--keep-running", action="store_true")
@@ -37,7 +37,7 @@ def main() -> None:
     args = parser.parse_args()
 
     if shutil.which("docker") is None:
-        raise RuntimeError("Docker is required for the secured local demonstration.")
+        raise RuntimeError("Docker is required for local system validation.")
 
     if not args.skip_pipeline:
         _run([sys.executable, "scripts/run_all.py"])
@@ -46,7 +46,7 @@ def main() -> None:
     environment = os.environ.copy()
     environment.update(
         {
-            "APP_ENV": "executive-demo",
+            "APP_ENV": "system-validation",
             "BUILD_DATE": datetime.now(timezone.utc).isoformat(),
             "BUILD_SHA": _git_sha(),
             "SERVICE_VERSION": environment.get("SERVICE_VERSION", "1.1.0"),
@@ -58,7 +58,7 @@ def main() -> None:
         _run(
             [
                 sys.executable,
-                "scripts/run_executive_demo.py",
+                "scripts/run_system_validation.py",
                 "--base-url",
                 args.base_url,
             ],

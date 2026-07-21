@@ -5,9 +5,9 @@ set -Eeuo pipefail
 : "${ACR_NAME:?Set a globally unique lowercase ACR_NAME.}"
 
 LOCATION="${LOCATION:-eastus}"
-RESOURCE_GROUP="${RESOURCE_GROUP:-hospitality-data-mlops-demo-rg}"
-CONTAINER_APP_ENVIRONMENT="${CONTAINER_APP_ENVIRONMENT:-hospitality-demo-env}"
-CONTAINER_APP_NAME="${CONTAINER_APP_NAME:-hospitality-member-risk-demo}"
+RESOURCE_GROUP="${RESOURCE_GROUP:-hospitality-data-mlops-validation-rg}"
+CONTAINER_APP_ENVIRONMENT="${CONTAINER_APP_ENVIRONMENT:-hospitality-validation-env}"
+CONTAINER_APP_NAME="${CONTAINER_APP_NAME:-hospitality-member-risk-validation}"
 IMAGE_NAME="${IMAGE_NAME:-member-risk-api}"
 SERVICE_VERSION="${SERVICE_VERSION:-1.1.0}"
 IMAGE_TAG="${IMAGE_TAG:-$(git rev-parse --short=12 HEAD)}"
@@ -35,7 +35,7 @@ az provider register --namespace Microsoft.OperationalInsights --wait >/dev/null
 az group create \
   --name "${RESOURCE_GROUP}" \
   --location "${LOCATION}" \
-  --tags workload=hospitality-reference purpose=executive-demo data=synthetic \
+  --tags workload=hospitality-reference purpose=system-validation data=synthetic \
   >/dev/null
 
 if ! az acr show --name "${ACR_NAME}" --resource-group "${RESOURCE_GROUP}" >/dev/null 2>&1; then
@@ -80,7 +80,7 @@ if ! az containerapp show \
     --target-port 80 \
     --min-replicas 0 \
     --max-replicas 2 \
-    --tags workload=hospitality-reference purpose=executive-demo data=synthetic \
+    --tags workload=hospitality-reference purpose=system-validation data=synthetic \
     >/dev/null
 fi
 
@@ -144,7 +144,7 @@ for attempt in $(seq 1 8); do
     --min-replicas 0 \
     --max-replicas 2 \
     --set-env-vars \
-      APP_ENV=azure-demo \
+      APP_ENV=azure-validation \
       MODEL_SOURCE=local \
       MODEL_ALIAS=Champion \
       SERVICE_VERSION="${SERVICE_VERSION}" \

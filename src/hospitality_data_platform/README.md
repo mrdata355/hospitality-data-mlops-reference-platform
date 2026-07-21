@@ -136,4 +136,4 @@ Or execute the combined target:
 make validate
 ```
 
-Generated reviewer samples are published under [`../../examples/`](../../examples/README.md).
+Generated validation samples are published under [`../../examples/`](../../examples/README.md).
