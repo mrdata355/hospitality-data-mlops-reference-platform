@@ -21,7 +21,7 @@ def test_azure_demo_workflow_is_manual_and_uses_oidc() -> None:
     assert "id-token: write" in workflow
     assert "azure/login@v2" in workflow
     assert "environment: azure-demo" in workflow
-    assert "synthetic" in workflow
+    assert "generated non-production data only" in workflow
     assert "push:" not in workflow
 
 
