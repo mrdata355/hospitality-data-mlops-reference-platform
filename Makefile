@@ -1,4 +1,4 @@
-.PHONY: install run examples test backtest validate quality security api container-up container-smoke benchmark container-down loadtest clean
+.PHONY: install run examples test backtest validate quality security api container-up container-smoke benchmark executive-demo executive-demo-live azure-deploy container-down loadtest clean
 
 install:
 	python -m pip install -r requirements.txt
@@ -39,6 +39,16 @@ container-smoke:
 
 benchmark:
 	python scripts/benchmark_serving.py --base-url http://localhost:8080 --requests 200 --concurrency 16 --warmup 20 --output artifacts/serving/local-benchmark.json
+
+executive-demo:
+	python scripts/run_local_executive_demo.py
+
+executive-demo-live:
+	@test -n "$(BASE_URL)" || (echo "Set BASE_URL to the deployed service URL." && exit 1)
+	python scripts/run_executive_demo.py --base-url "$(BASE_URL)" --evidence artifacts/deployment/executive-demo.json
+
+azure-deploy: backtest
+	bash scripts/deploy_azure_container_app.sh
 
 container-down:
 	docker compose down
